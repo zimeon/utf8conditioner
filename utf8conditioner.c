@@ -22,7 +22,7 @@
  *   (unsigned long int). Will result in incorrect output messages.
  * - doesn't handle UTF-8 encoding of UTF-16/UCS-4. 
  *
- * [CVS: $Id: utf8conditioner.c,v 1.6 2001/08/01 20:59:43 simeon Exp $]
+ * [CVS: $Id: utf8conditioner.c,v 1.7 2002/08/07 22:16:55 simeon Exp $]
  */
 
 #include <stdio.h>
@@ -37,6 +37,7 @@ extern int snprintf(char *str, size_t size, const char *format, ...);
 extern const char *optarg;
 extern int getopt (int argc, char *const *argv, const char *shortopts);
 
+int validUnicodeChar(unsigned int ch);
 int validXMLChar(unsigned int ch);
 
 
@@ -59,11 +60,21 @@ int main (int argc, char* argv[]) {
   int check=0;                    /* check only option */
   int substituteChar = '?';       /* substitute for bad characters */
   int checkXMLChars=1;            /* XML checks option */
-  int badMultibyteToSingleChar=0; /* -m option */
+  int checkOverlong=1;            /* Check for overlong character encodings */
+  int badMultiByteToMultiChar=0;  /* -m option */
 
   int badChar=0;                  /* variables for bad characters option */ 
   unsigned int badChars[MAX_BAD_CHAR];
+  int highestCharInNBytes[6];
+
   badChars[badChar] = 0;          /* terminator */
+
+  highestCharInNBytes[0]=0x7F;
+  highestCharInNBytes[1]=0x7FF;
+  highestCharInNBytes[2]=0xFFFF;
+  highestCharInNBytes[3]=0x1FFFFF;
+  highestCharInNBytes[4]=0x3FFFFFF;
+  highestCharInNBytes[5]=0x7FFFFFFF;
 
   /*
    * Read any options
@@ -85,7 +96,7 @@ int main (int argc, char* argv[]) {
   	  "       use multiple times at add multiple characters\n", maxErrors);
         fprintf(stderr,
           "  -s   change character substituted for bad characters (currently '%c')\n"
-          "  -m   replace invalid multi-byte sequence with single dummy character\n"
+          "  -m   replace invalid multi-byte sequence with multiple dummy characters\n"
           "  -x   do NOT remove characters not allowed in UTF-8 XML streams\n"
           "       (valid: #x9 | #xA | #xD | [#x20-#xD7FF] | [#xE000-#xFFFD] | [#x10000-#x10FFFF])\n"
           "  -h   this help\n\n", substituteChar);  
@@ -112,7 +123,7 @@ int main (int argc, char* argv[]) {
         substituteChar = optarg[0];
         break;
       case 'm':
-        badMultibyteToSingleChar=1;
+        badMultiByteToMultiChar=1;
         break;
       case 'x':
         checkXMLChars=0;
@@ -129,9 +140,8 @@ int main (int argc, char* argv[]) {
     if (ch=='\n') { linenum++; }
     error[0]='\0'; /* clear error string */
     unicode=ch;
-    if (!(ch&0x80)) {
+    if ((ch&0x80)==0) {
       /* one byte char    0000 0000-0000 007F   0xxxxxxx */
-      /* one byte is the only legal way to specify null */
       contBytes=0;
     } else if ((ch&0xE0)==0xC0) {
       /* 0000 0080-0000 07FF   110xxxxx 10xxxxxx */
@@ -199,10 +209,25 @@ int main (int argc, char* argv[]) {
         }
       } 
     }
+  
+    /* check for illegal Unicode chars */
+    if ((error[0]=='\0') && !validUnicodeChar(unicode)) {
+      snprintf(buf,sizeof(buf),"invalid Unicode char: 0x%04X",unicode);
+      strncat(error,buf,sizeof(error));
+    }
+
+    /* check for overlong encodings if no error already */
+    if ((error[0]=='\0') && checkOverlong && contBytes>0 
+                         && (unicode<=highestCharInNBytes[contBytes-1])) {
+      unicode=substituteChar;
+      snprintf(buf,sizeof(buf),"overlong encoding, not safe: 0x%04X",unicode);
+      strncat(error,buf,sizeof(error));
+    }
+ 
 
     if (error[0]!='\0') {
       numErrors++;
-      if (!badMultibyteToSingleChar && j>1) {
+      if (badMultiByteToMultiChar && j>1) {
         /* now test individual bytes of bad multibyte char, will always
          * make substitution for at least the first char.
          */
@@ -225,6 +250,7 @@ int main (int argc, char* argv[]) {
 	snprintf(buf,sizeof(buf),", substituted 0x%02X", byte[0]);
         strncat(error, buf, sizeof(error));
       }
+
       if (!quiet && (numErrors<=maxErrors || maxErrors==0)) {
         fprintf(stderr,"Line %ld, char %ld, byte %ld: %s\n",
                 linenum,charnum,bytenum,error);
@@ -248,6 +274,15 @@ int main (int argc, char* argv[]) {
   exit(0);
 }
 
+
+/* Returns true unless the character is one of a small set of codes
+ * that do not represent legal characters in Unicode.
+ */
+int validUnicodeChar(unsigned int ch) {
+  return(!(ch==0xD800 || ch==0xDB7F || ch==0xDB80 || ch==0xDBFF ||
+           ch==0xDC00 || ch==0xDF80 || ch==0xDFFF || 
+           ch==0xFFFE || ch==0xFFFF));
+}
 
 
 /* From http://www.w3.org/TR/2000/REC-xml-20001006 

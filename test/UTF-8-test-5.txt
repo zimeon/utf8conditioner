@@ -1,0 +1,34 @@
+5  Illegal code positions                                                     |
+                                                                              |
+The following UTF-8 sequences should be rejected like malformed               |
+sequences, because they never represent valid ISO 10646 characters and        |
+a UTF-8 decoder that accepts them might introduce security problems           |
+comparable to overlong UTF-8 sequences.                                       |
+                                                                              |
+5.1 Single UTF-16 surrogates                                                  |
+                                                                              |
+5.1.1  U+D800 = ed a0 80 = "í €"                                                |
+5.1.2  U+DB7F = ed ad bf = "í­¿"                                                |
+5.1.3  U+DB80 = ed ae 80 = "í®€"                                                |
+5.1.4  U+DBFF = ed af bf = "í¯¿"                                                |
+5.1.5  U+DC00 = ed b0 80 = "í°€"                                                |
+5.1.6  U+DF80 = ed be 80 = "í¾€"                                                |
+5.1.7  U+DFFF = ed bf bf = "í¿¿"                                                |
+                                                                              |
+5.2 Paired UTF-16 surrogates                                                  |
+                                                                              |
+5.2.1  U+D800 U+DC00 = ed a0 80 ed b0 80 = "í €í°€"                               |
+5.2.2  U+D800 U+DFFF = ed a0 80 ed bf bf = "í €í¿¿"                               |
+5.2.3  U+DB7F U+DC00 = ed ad bf ed b0 80 = "í­¿í°€"                               |
+5.2.4  U+DB7F U+DFFF = ed ad bf ed bf bf = "í­¿í¿¿"                               |
+5.2.5  U+DB80 U+DC00 = ed ae 80 ed b0 80 = "í®€í°€"                               |
+5.2.6  U+DB80 U+DFFF = ed ae 80 ed bf bf = "í®€í¿¿"                               |
+5.2.7  U+DBFF U+DC00 = ed af bf ed b0 80 = "í¯¿í°€"                               |
+5.2.8  U+DBFF U+DFFF = ed af bf ed bf bf = "í¯¿í¿¿"                               |
+                                                                              |
+5.3 Other illegal code positions                                              |
+                                                                              |
+5.3.1  U+FFFE = ef bf be = "ï¿¾"                                                |
+5.3.2  U+FFFF = ef bf bf = "ï¿¿"                                                |
+                                                                              |
+THE END                                                                       |
