@@ -1,7 +1,11 @@
-01: Test file for utf8conditioner, Simeon Warner 1Aug2001, $Id: testfile,v 1.1 2001/08/01 20:45:53 simeon Exp $
-02: valid 2 byte (\317\217) œè
-03: valid 3 byte (\357\217\217) Ôèè
-04: invalid 2 byte (\317a) œa
-05: invalid 3 byte (\357\201a) ÔÅa
-06: bye
+01: Test file for utf8conditioner, Simeon Warner 1Aug2001, $Id: testfile,v 1.2 2001/08/01 20:57:19 simeon Exp $
+02: 0xXX are the hex values of the bytes that follow 
+02: valid 2 byte (0xCF 0x8F) œè
+03: valid 3 byte (0xEF 0x81 0x81) Ôèè
+04: invalid 2 byte (0xCF a) œa
+05: invalid 3 byte (0xEF 0x81 a) ÔÅa
+06: illegal byte in UTF-8 (0xB0) ∞ 
+07: not allowed in XML (0x0B)  
+08: bye
+
 
