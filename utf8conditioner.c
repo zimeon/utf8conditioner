@@ -19,7 +19,7 @@
  *   (unsigned long int). Will result in incorrect output messages.
  * - doesn't handle UTF-8 encoding of UTF-16/UCS-4. 
  *
- * [CVS: $Id: utf8conditioner.c,v 1.4 2001/07/27 03:36:51 simeon Exp $]
+ * [CVS: $Id: utf8conditioner.c,v 1.5 2001/07/31 03:39:34 simeon Exp $]
  */
 
 #include <stdio.h>
@@ -107,6 +107,7 @@ int main (int argc, char* argv[]) {
     bytenum++; charnum++;
     if (ch=='\n') { linenum++; }
     error[0]='\0'; /* clear error string */
+    unicode=ch;
     if (!(ch&0x80)) {
       /* one byte char    0000 0000-0000 007F   0xxxxxxx */
       /* one byte is the only legal way to specify null */
@@ -114,31 +115,35 @@ int main (int argc, char* argv[]) {
     } else if ((ch&0xE0)==0xC0) {
       /* 0000 0080-0000 07FF   110xxxxx 10xxxxxx */
       contBytes=1;
+      unicode=(ch&0x1F);
     } else if ((ch&0xF0)==0xE0) {
       /* 0000 0800-0000 FFFF   1110xxxx 10xxxxxx 10xxxxxx */
       contBytes=2;
+      unicode=(ch&0x0F);
     } else if ((ch&0xF8)==0xF0) {
       /* 0001 0000-001F FFFF   11110xxx 10xxxxxx 10xxxxxx 10xxxxxx */
       contBytes=3;
+      unicode=(ch&0x07);
     } else if ((ch&0xFC)==0xF8) {
       /* 0020 0000-03FF FFFF   111110xx 10xxxxxx 10xxxxxx 10xxxxxx 10xxxxxx */
       contBytes=4;
+      unicode=(ch&0x03);
     } else if ((ch&0xFE)==0xFC) {
       /* 0400 0000-7FFF FFFF   1111110x 10xxxxxx ... 10xxxxxx */
       contBytes=5;
+      unicode=(ch&0x01);
     } else {
-      if (!quiet) { snprintf(error,sizeof(error),"illegal byte: 0x%02x", ch); }
+      if (!quiet) { snprintf(error,sizeof(error),"illegal byte: 0x%02X", ch); }
       contBytes=0;
     }
     byte[0]=ch;
     
-    unicode=(ch&0x7F);
     for (j=1; j<=contBytes; j++) {
       if ((ch=getc(stdin))!=EOF) {
         bytenum++;
-        if ((ch&0xA0)!=0x80) {
+        if ((ch&0xC0)!=0x80) {
           /* doesn't match 10xxxxxx */
-	  snprintf(buf,sizeof(buf),"byte %d isn't continuation: 0x%02x", (j+1), ch);
+	  snprintf(buf,sizeof(buf),"byte %d isn't continuation: 0x%02X", (j+1), ch);
           strncat(error, buf, sizeof(error));
 	  ungetc(ch,stdin);
 	  bytenum--;
@@ -156,11 +161,11 @@ int main (int argc, char* argv[]) {
     if (error[0]=='\0') {
       j=-1;
       if (checkXMLChars && !validXMLChar(unicode)) {
-        snprintf(error,sizeof(error),"character not allowed in XML: 0x%04x",unicode);
+        snprintf(error,sizeof(error),"character not allowed in XML: 0x%04X",unicode);
       } else { 
         while (badChars[++j]!=0) {
           if (unicode==badChars[j]) {
-            snprintf(error,sizeof(error),"bad character: 0x%04x", unicode);
+            snprintf(error,sizeof(error),"bad character: 0x%04X", unicode);
             break;
           }
         }
