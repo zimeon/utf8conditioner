@@ -1,0 +1,82 @@
+<html>
+<head>
+<title>Software - utf8conditioner</title>
+</head>
+<body>
+
+<h1><code>utf8conditioner</code></h1>
+
+<p>
+This is a small C program that will either check or `fix' a UTF8 bytestream.
+It was designed to be used within an <a href="http://www.openarchives.org">OAI</a>
+harvester to attempt to remove bad codes from supposedly UTF8 bytestreams so
+that they can then be parsed using a standard XML parser which would otherwise
+fail. Without knowing why an illegal code is present in a supposedly UTF8
+bytestream (and thus what it should have been), it is impossible to properly 
+correct an illegal UTF8 bytestream.
+However, experience has shown that some OAI server implementations which do not
+use good XML writing libraries sometimes write byte streams which include codes 
+from other character sets which make otherwise correctly structured XML responses 
+unparsable. 
+The <code>utf8conditioner</code> simply substitutes a dummy character or string 
+(<code>?</code> by default) in place of bad byte sequences. This causes local 
+corruption but usually allows the harvesting process to continue. Any harvester
+should, of course, flag such errors to the operator and the operator should
+report such errors to the data-provider so that they can be corrected. 
+</p>
+<p>
+This program is supplied under the GNU Public License. It makes use of
+the library routine <code>getopt.c</code> (included in the source) which is
+also supplied under the GNU Public License. See the file <code>COPYING</code>
+for details.
+</p>
+
+<h2>Download</h2>
+<p>
+
+<a href="utf8conditioner.tar.gz"><code>utf8conditioner.tar.gz</code></a> (14kB),
+<a href="utf8conditioner.zip"<code>utf8conditioner.zip</code></a> (16kB).
+</p>
+
+<h2>Compiling and testing</h2>
+<p>
+This code was written and tested on an Intel-based Linux system using gcc. 
+It is written in ANSI C and should compile on other platforms. I'd be 
+interested to hear of problems/solutions for use on other platforms.
+</p>
+<ol>
+<li>Unpack and change directory to location of source (unpacks in directory <tt>utf8</tt>)
+<li>Edit the <code>Makefile</code> as necessary to set c compiler etc.
+<li>Run <code>make</code> (e.g. <code>./make</code>)
+<li>Executable is called <code>utf8conditioner</code>, it can be moved anywhere
+  that is convenient.
+<li>Run with <tt>-h</tt> flag to show options, e.g. <tt>./utf8conditioner -h</tt>.
+</ol>
+
+<h2>Use</h2>
+<p>
+Typical use for checking (<tt>-c</tt> flag) an XML file (<tt>-x</tt> flag for XML)is:
+</p>
+<pre>
+cat utf8file | ./utf8conditioner -c -x
+</pre>
+<p>
+Typical use for checking and `fixing' an XML file is:
+</p>
+<pre>
+cat utf8file | ./utf8conditioner -x > fixedFile
+</pre>
+
+<h2>Bugs</h2>
+<p>
+Please send bug reports to 
+<a href="mailto:simeon@cs.cornell.edu"><code>simeon@cs.cornell.edu</code></a>.
+</p>
+
+<hr>
+<address>
+$Id: index.html,v 1.1 2003/01/14 20:28:39 simeon Exp $
+</address>
+</body>
+</html>
+
