@@ -1,0 +1,7 @@
+01: Test file for utf8conditioner, Simeon Warner 1Aug2001, $Id: testfile,v 1.1 2001/08/01 20:45:53 simeon Exp $
+02: valid 2 byte (\317\217) Ï
+03: valid 3 byte (\357\217\217) ï
+04: invalid 2 byte (\317a) Ïa
+05: invalid 3 byte (\357\201a) ïa
+06: bye
+
