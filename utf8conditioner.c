@@ -3,9 +3,9 @@
  *
  * Designed for use with Open Archives Initiative (OAI, 
  * see: http://www.openarchives.org/) harvesting software. Aims to 
- * `fix' bad characters in UTF-8 encoded XML so that XML parsers will
+ * `fix' bad codes in UTF-8 encoded XML so that XML parsers will
  * be able to parse it (albeit with some corruption introduced by
- * substitution of dummy characters in place of invalid ones).
+ * substitution of dummy characters in place of illegal codes).
  *
  * I assume that the most likely cause of errors is inclusion of non-UTF-8
  * bytes from various 8-bit character sets. Thus, any attempt to read a
@@ -22,7 +22,7 @@
  *   (unsigned long int). Will result in incorrect output messages.
  * - doesn't handle UTF-8 encoding of UTF-16/UCS-4. 
  *
- * [CVS: $Id: utf8conditioner.c,v 1.7 2002/08/07 22:16:55 simeon Exp $]
+ * [CVS: $Id: utf8conditioner.c,v 1.8 2002/08/08 04:33:43 simeon Exp $]
  */
 
 #include <stdio.h>
@@ -32,7 +32,6 @@ extern int snprintf(char *str, size_t size, const char *format, ...);
 #include "getopt.h" /* for getopt(), could use unistd on Unix */ 
 
 #define MAX_BAD_CHAR 100
-
 
 extern const char *optarg;
 extern int getopt (int argc, char *const *argv, const char *shortopts);
@@ -59,7 +58,7 @@ int main (int argc, char* argv[]) {
   int quiet=0;                    /* quiet option */
   int check=0;                    /* check only option */
   int substituteChar = '?';       /* substitute for bad characters */
-  int checkXMLChars=1;            /* XML checks option */
+  int checkXMLChars=0;            /* XML checks option */
   int checkOverlong=1;            /* Check for overlong character encodings */
   int badMultiByteToMultiChar=0;  /* -m option */
 
@@ -92,13 +91,14 @@ int main (int argc, char* argv[]) {
           "  -q   quiet, no output messages to stderr\n"
           "  -c   just check, no output of XML to stdout\n"   
           "  -e   number of error messages to print (currently %d, 0 for unlimited)\n"
-          "  -b   add Unicode character char to list of bad characters (decimal, 0octal, 0xhex),\n"
+          "  -b   add Unicode character code to list of bad codes (decimal, 0octal, 0xhex),\n"
   	  "       use multiple times at add multiple characters\n", maxErrors);
         fprintf(stderr,
-          "  -s   change character substituted for bad characters (currently '%c')\n"
+          "  -s   change character substituted for bad codes (currently '%c')\n"
           "  -m   replace invalid multi-byte sequence with multiple dummy characters\n"
-          "  -x   do NOT remove characters not allowed in UTF-8 XML streams\n"
+          "  -x   remove codes not allowed in UTF-8 XML streams\n"
           "       (valid: #x9 | #xA | #xD | [#x20-#xD7FF] | [#xE000-#xFFFD] | [#x10000-#x10FFFF])\n"
+          "  -l   lax - don't check for overlong encodings\n"
           "  -h   this help\n\n", substituteChar);  
         exit(1);
       case 'q':
@@ -109,8 +109,7 @@ int main (int argc, char* argv[]) {
         break; 
       case 'b':
         if (badChar>=(MAX_BAD_CHAR-1)) {
-          fprintf(stderr,"Too many bad characters specified, limit %d.\n", 
-                         MAX_BAD_CHAR);
+          fprintf(stderr,"Too many bad codes specified, limit %d.\n", MAX_BAD_CHAR);
           exit(1); 
         } 
         badChars[badChar++]=(int)strtoul(optarg,NULL,0);
@@ -125,15 +124,18 @@ int main (int argc, char* argv[]) {
       case 'm':
         badMultiByteToMultiChar=1;
         break;
+      case 'l':
+        checkOverlong=0;
+        break;
       case 'x':
-        checkXMLChars=0;
+        checkXMLChars=1;
         break; 
     }
   }
 
   /*
-   * Got through input character by character, check for correct use of
-   * UTF-8 continuation bytes, check for unicode character validity
+   * Go through input code (character) by code and check for correct use 
+   * of UTF-8 continuation bytes, check for unicode character validity
    */
   while ((ch=getc(stdin))!=EOF) {
     bytenum++; charnum++;
@@ -189,8 +191,7 @@ int main (int argc, char* argv[]) {
         }
         unicode = (unicode << 6) + (ch&0x3F);
       } else {
-        snprintf(buf,sizeof(buf),"premature EOF at byte %ld, should be byte %d of character",
-	         bytenum, j);
+        snprintf(buf,sizeof(buf),"premature EOF at byte %ld, should be byte %d of code", bytenum, j);
         strncat(error,buf,sizeof(error));
         break;
       }
@@ -199,11 +200,11 @@ int main (int argc, char* argv[]) {
     if (error[0]=='\0') {
       k=-1;
       if (checkXMLChars && !validXMLChar(unicode)) {
-        snprintf(error,sizeof(error),"character not allowed in XML: 0x%04X",unicode);
+        snprintf(error,sizeof(error),"code not allowed in XML: 0x%04X",unicode);
       } else { 
         while (badChars[++k]!=0) {
           if (unicode==badChars[k]) {
-            snprintf(error,sizeof(error),"bad character: 0x%04X", unicode);
+            snprintf(error,sizeof(error),"bad code: 0x%04X", unicode);
             break;
           }
         }
@@ -211,8 +212,8 @@ int main (int argc, char* argv[]) {
     }
   
     /* check for illegal Unicode chars */
-    if ((error[0]=='\0') && !validUnicodeChar(unicode)) {
-      snprintf(buf,sizeof(buf),"invalid Unicode char: 0x%04X",unicode);
+    if ((error[0]=='\0') && !validUTF8Char(unicode)) {
+      snprintf(buf,sizeof(buf),"illegal UTF-8 code: 0x%04X",unicode);
       strncat(error,buf,sizeof(error));
     }
 
@@ -268,8 +269,7 @@ int main (int argc, char* argv[]) {
   }
 
   if (!quiet && (numErrors>maxErrors) && (maxErrors!=0)) {
-    fprintf(stderr,"%d additional errors not reported.\n",
-                   (numErrors-maxErrors));
+    fprintf(stderr,"%d additional errors not reported.\n", (numErrors-maxErrors));
   }
   exit(0);
 }
@@ -277,11 +277,14 @@ int main (int argc, char* argv[]) {
 
 /* Returns true unless the character is one of a small set of codes
  * that do not represent legal characters in Unicode.
+ *
+ * From Unicode 3.2 (http://www.unicode.org/unicode/reports/tr28/#3_1_conformance) 
+ * U+D800..U+DFFF ill-formed 
+ *
+ * Ux10FFFF is highest UTF-8 char
  */
-int validUnicodeChar(unsigned int ch) {
-  return(!(ch==0xD800 || ch==0xDB7F || ch==0xDB80 || ch==0xDBFF ||
-           ch==0xDC00 || ch==0xDF80 || ch==0xDFFF || 
-           ch==0xFFFE || ch==0xFFFF));
+int validUTF8Char(unsigned int ch) {
+  return((ch<0xD800 || ch>0xDFFF) && ch<=0x10FFFF);
 }
 
 
