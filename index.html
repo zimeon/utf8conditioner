@@ -7,13 +7,13 @@
 <h1><code>utf8conditioner</code></h1>
 
 <p>
-This is a small C program that will either check or `fix' a UTF8 bytestream.
+This is a small C program that will either check or `fix' a UTF8 byte stream.
 It was designed to be used within an <a href="http://www.openarchives.org">OAI</a>
-harvester to attempt to remove bad codes from supposedly UTF8 bytestreams so
+harvester to attempt to remove bad codes from supposedly UTF8 byte streams so
 that they can then be parsed using a standard XML parser which would otherwise
 fail. Without knowing why an illegal code is present in a supposedly UTF8
-bytestream (and thus what it should have been), it is impossible to properly 
-correct an illegal UTF8 bytestream.
+byte stream (and thus what it should have been), it is impossible to properly 
+correct an illegal UTF8 byte stream.
 However, experience has shown that some OAI server implementations which do not
 use good XML writing libraries sometimes write byte streams which include codes 
 from other character sets which make otherwise correctly structured XML responses 
@@ -25,10 +25,11 @@ should, of course, flag such errors to the operator and the operator should
 report such errors to the data-provider so that they can be corrected. 
 </p>
 <p>
-This program is supplied under the GNU Public License. It makes use of
-the library routine <code>getopt.c</code> (included in the source) which is
-also supplied under the GNU Public License. See the file <code>COPYING</code>
-for details.
+This software is supplied under the GNU General Public License, 
+see the file <code>COPYING</code> for details.
+This software makes use of the routine <code>getopt.c</code> (included 
+with the source) developed by the University of California, Berkeley 
+and its contributors.
 </p>
 
 <h2>Download</h2>
@@ -55,7 +56,7 @@ interested to hear of problems/solutions for use on other platforms.
 
 <h2>Use</h2>
 <p>
-Typical use for checking (<tt>-c</tt> flag) an XML file (<tt>-x</tt> flag for XML)is:
+Typical use for checking (<tt>-c</tt> flag) an XML file (<tt>-x</tt> flag for XML) is:
 </p>
 <pre>
 cat utf8file | ./utf8conditioner -c -x
@@ -70,12 +71,13 @@ cat utf8file | ./utf8conditioner -x > fixedFile
 <h2>Bugs</h2>
 <p>
 Please send bug reports to 
+<a href="http://www.cs.cornell.edu/people/simeon">me</a> at
 <a href="mailto:simeon@cs.cornell.edu"><code>simeon@cs.cornell.edu</code></a>.
 </p>
 
 <hr>
 <address>
-$Id: index.html,v 1.2 2003/01/14 20:38:10 simeon Exp $
+$Id: index.html,v 1.3 2003/01/14 20:48:10 simeon Exp $
 </address>
 </body>
 </html>
