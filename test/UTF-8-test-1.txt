@@ -1,0 +1,5 @@
+1  Some correct UTF-8 text                                                    |
+                                                                              |
+You should see the Greek word 'kosme':       "κόσμε"                          |
+
+THE END                                                                       |

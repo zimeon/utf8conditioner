@@ -1,0 +1,85 @@
+3  Malformed sequences                                                        |
+                                                                              |
+3.1  Unexpected continuation bytes                                            |
+                                                                              |
+Each unexpected continuation byte should be separately signalled as a         |
+malformed sequence of its own.                                                |
+                                                                              |
+3.1.1  First continuation byte 0x80: "€"                                      |
+3.1.2  Last  continuation byte 0xbf: "¿"                                      |
+                                                                              |
+3.1.3  2 continuation bytes: "€¿"                                             |
+3.1.4  3 continuation bytes: "€¿€"                                            |
+3.1.5  4 continuation bytes: "€¿€¿"                                           |
+3.1.6  5 continuation bytes: "€¿€¿€"                                          |
+3.1.7  6 continuation bytes: "€¿€¿€¿"                                         |
+3.1.8  7 continuation bytes: "€¿€¿€¿€"                                        |
+                                                                              |
+3.1.9  Sequence of all 64 possible continuation bytes (0x80-0xbf):            |
+                                                                              |
+   "€‚ƒ„…†‡ˆ‰Š‹Œ                                                          |
+    ‘’“”•–—˜™š›œŸ                                                          |
+     ¡¢£¤¥¦§¨©ª«¬­®¯                                                          |
+    °±²³´µ¶·¸¹º»¼½¾¿"                                                         |
+                                                                              |
+3.2  Lonely start characters                                                  |
+                                                                              |
+3.2.1  All 32 first bytes of 2-byte sequences (0xc0-0xdf),                    |
+       each followed by a space character:                                    |
+                                                                              |
+   "À Á Â Ã Ä Å Æ Ç È É Ê Ë Ì Í Î Ï                                           |
+    Ğ Ñ Ò Ó Ô Õ Ö × Ø Ù Ú Û Ü İ Ş ß "                                         |
+                                                                              |
+3.2.2  All 16 first bytes of 3-byte sequences (0xe0-0xef),                    |
+       each followed by a space character:                                    |
+                                                                              |
+   "à á â ã ä å æ ç è é ê ë ì í î ï "                                         |
+                                                                              |
+3.2.3  All 8 first bytes of 4-byte sequences (0xf0-0xf7),                     |
+       each followed by a space character:                                    |
+                                                                              |
+   "ğ ñ ò ó ô õ ö ÷ "                                                         |
+                                                                              |
+3.2.4  All 4 first bytes of 5-byte sequences (0xf8-0xfb),                     |
+       each followed by a space character:                                    |
+                                                                              |
+   "ø ù ú û "                                                                 |
+                                                                              |
+3.2.5  All 2 first bytes of 6-byte sequences (0xfc-0xfd),                     |
+       each followed by a space character:                                    |
+                                                                              |
+   "ü ı "                                                                     |
+                                                                              |
+3.3  Sequences with last continuation byte missing                            |
+                                                                              |
+All bytes of an incomplete sequence should be signalled as a single           |
+malformed sequence, i.e., you should see only a single replacement            |
+characters in each of the next 10 tests. (Characters as in section 2)         |
+                                                                              |
+3.3.1  2-byte sequence with last byte missing (U+0000):     "À"               |
+3.3.2  3-byte sequence with last byte missing (U+0000):     "à€"               |
+3.3.3  4-byte sequence with last byte missing (U+0000):     "ğ€€"               |
+3.3.4  5-byte sequence with last byte missing (U+0000):     "ø€€€"               |
+3.3.5  6-byte sequence with last byte missing (U+0000):     "ü€€€€"               |
+3.3.6  2-byte sequence with last byte missing (U-000007FF): "ß"               |
+3.3.7  3-byte sequence with last byte missing (U-0000FFFF): "ï¿"               |
+3.3.8  4-byte sequence with last byte missing (U-001FFFFF): "÷¿¿"               |
+3.3.9  5-byte sequence with last byte missing (U-03FFFFFF): "û¿¿¿"               |
+3.3.10 6-byte sequence with last byte missing (U-7FFFFFFF): "ı¿¿¿¿"               |
+                                                                              |
+3.4  Concatenation of incomplete sequences                                    |
+                                                                              |
+All the 10 sequences of 3.3 concatenated, you should see 10 malformed         |
+sequences being signalled:                                                    |
+                                                                              |
+   "Àà€ğ€€ø€€€ü€€€€ßï¿÷¿¿û¿¿¿ı¿¿¿¿"                                                               |
+                                                                              |
+3.5  Impossible bytes                                                         |
+                                                                              |
+The following two bytes cannot appear in a correct UTF-8 string               |
+                                                                              |
+3.5.1  fe = "ş"                                                               |
+3.5.2  ff = "ÿ"                                                               |
+3.5.3  fe fe ff ff = "şşÿÿ"                                                   |
+                                                                              |
+THE END                                                                       |
