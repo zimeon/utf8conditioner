@@ -26,13 +26,12 @@
  * Bugs:
  * - no protection against overflow of byte, character and line counters
  *   (unsigned long int). Will result in incorrect output messages.
- * - doesn't handle UTF-8 encoding of UTF-16/UCS-4. 
  *
- * [CVS: $Id: utf8conditioner.c,v 1.11 2003/06/27 19:20:26 simeon Exp $]
+ * [CVS: $Id: utf8conditioner.c,v 1.12 2003/12/23 18:24:21 simeon Exp $]
  */
 
 #define PROGRAM_NOTICE "\
-utf8conditioner version 14Jan2003. Copyright (C) 2001-2003 Simeon Warner\n\
+utf8conditioner version 23Dec2003. Copyright (C) 2001-2003 Simeon Warner\n\
 \n\
 utf8conditioner is supplied under the GNU Public License and comes\n\
 with ABSOLUTELY NO WARRANTY; run with -L flag for more details.\n\
@@ -65,7 +64,8 @@ extern int snprintf(char *str, size_t size, const char *format, ...);
 #define MAX_BAD_CHAR 100
 
 int validUnicodeChar(unsigned int ch);
-int validXMLChar(unsigned int ch);
+int validXML1_0Char(unsigned int ch);
+int validXML1_1Char(unsigned int ch);
 int validUTF8Char(unsigned int ch);
 
 int main (int argc, char* argv[]) {
@@ -74,7 +74,7 @@ int main (int argc, char* argv[]) {
   char error[200];                /* place to build error string */
   char buf[50];                   /* tmp used when building error string */ 
 
-  int byte[6];                    /* bytes of UTF-8 char */
+  int byte[10];                   /* bytes of UTF-8 char (must be long enough to hold &#x10FFFF\0 */
   int contBytes;                  /* number of continuation bytes (0-5) */
   unsigned long int bytenum=0;    /* count of bytes read */
   unsigned long int charnum=0;    /* count of characters read */
@@ -84,9 +84,11 @@ int main (int argc, char* argv[]) {
   int maxErrors=1000;             /* max number of error messages to print */
   int numErrors=0;                /* count of errors */   
   int quiet=0;                    /* quiet option */
-  int check=0;                    /* check only option */
+  int checkOnly=0;                /* check only option */
   int substituteChar = '?';       /* substitute for bad characters */
-  int checkXMLChars=0;            /* XML checks option */
+  int checkXML1_0Chars=0;         /* XML1.0 checks option */
+  int checkXML1_1Chars=0;         /* XML1.1 checks option for Char*/
+  int checkXML1_1Restricted=0;    /* XML1.1 checks option for RestrictedChar*/
   int checkOverlong=1;            /* Check for overlong character encodings */
   int badMultiByteToMultiChar=0;  /* -m option */
 
@@ -106,7 +108,7 @@ int main (int argc, char* argv[]) {
   /*
    * Read any options
    */
-  while ((j=getopt(argc,argv,"hH?qce:b:s:xmlL"))!=EOF) {
+  while ((j=getopt(argc,argv,"hH?qce:b:s:xX:mlL"))!=EOF) {
     switch (j) {
       case 'h': 
       case 'H':
@@ -114,24 +116,33 @@ int main (int argc, char* argv[]) {
         /* string split to meet ISO C89 requirement of <=509 chars */
         fprintf(stderr, PROGRAM_NOTICE);
         fprintf(stderr,"\n\
-usage: %s [-q] [-c] [-e num] [[-b char]] [-x] [-s char] [-h]\n\n\
+usage: %s [-q] [-c] [-e num] [[-b char]] [-x] [[-X type]] [-s char] [-h]\n\n\
 Takes UTF-8 input from stdin, writes processed UTF-8 to stdout\n\
 and errors/warnings to stderr.\n\n", argv[0]);
         fprintf(stderr,"\
   -c   just check, no output of XML to stdout\n\
   -q   quiet, don't output messages to stderr\n\
-  -x   XML check, remove codes not allowed in UTF-8 XML streams\n\
-       (valid codes are: #x9 | #xA | #xD and the ranges\n\
-        [#x20-#xD7FF] | [#xE000-#xFFFD] | [#x10000-#x10FFFF])\n\n");
+  -x   XML check (same as '-X 1.0')\n\
+  -X   Specific XML check, valid types are:\n\
+         1.0  check for codes valid in XML1.0 UTF-8 streams
+              (valid codes are: #x9 | #xA | #xD and the ranges\n\
+              [#x20-#xD7FF] | [#xE000-#xFFFD] | [#x10000-#x10FFFF])\n\
+         1.1  check for codes valid in XML1.1 UTF-8 streams\n\
+              (valid codes are: [#x1-#xD7FF] | [#xE000-#xFFFD] |\n\
+              [#x10000-#x10FFFF]), and also make numerical character 
+              reference substitutions for restricted codes
+              (restricted codes are [#x1-#x8] | [#xB-#xC] |\n\
+              [#xE-#x1F] | [#x7F-#x84] | [#x86-#xBF])\n\
+         1.1lax  as 1.1 but do nothing about restricted chars.\n");
         fprintf(stderr,"\
   -b   add Unicode character code to list of bad codes\n\
        (specified as decimal, 0octal or  0xhex),\n\
        use multiple times at add multiple characters\n\
   -e   maximum number of error messages to print\n\
-       (currently %d, 0 for unlimited)\n\
+       (default %d, 0 for unlimited)\n\
   -l   lax - don't check for overlong encodings\n\
   -m   replace invalid multi-byte sequences with multiple dummy characters\n\
-  -s   change character substituted for bad codes (currently '%c')\n\n\
+  -s   change character substituted for bad codes (default '%c')\n\n\
   -L   display information about license\n\
   -h   this help\n\n", maxErrors, substituteChar);  
         exit(1);
@@ -139,7 +150,7 @@ and errors/warnings to stderr.\n\n", argv[0]);
         quiet=1;
         break;
       case 'c':
-        check=1;
+        checkOnly=1;
         break; 
       case 'b':
         if (badChar>=(MAX_BAD_CHAR-1)) {
@@ -162,7 +173,20 @@ and errors/warnings to stderr.\n\n", argv[0]);
         checkOverlong=0;
         break;
       case 'x':
-        checkXMLChars=1;
+        checkXML1_0Chars=1;
+        break; 
+      case 'X':
+        if (strcmp(utf8_optarg,"1.0")==0) {
+          checkXML1_0Chars=1;
+        } else if (strcmp(utf8_optarg,"1.1")==0) { 
+          checkXML1_1Chars=1;
+          checkXML1_1Restricted=1;
+        } else if (strcmp(utf8_optarg,"1.1lax")==0) { 
+          checkXML1_1Chars=1;
+        } else {
+          fprintf(stderr,"Bad value for -X flag: '%s', aborting!\n",utf8_optarg);
+          exit(1);
+        }
         break; 
       case 'L':
         fprintf(stderr,GNU_GPL_NOTICE1);
@@ -244,9 +268,24 @@ and errors/warnings to stderr.\n\n", argv[0]);
       }
     }
 
+    /* check for overlong encodings if no error already */
+    if ((error[0]=='\0') && checkOverlong && contBytes>0 
+                         && (unicode<=highestCharInNBytes[contBytes-1])) {
+      snprintf(buf,sizeof(buf),"illegal overlong encoding of 0x%04X",unicode);
+      strncat(error,buf,sizeof(error));
+    }
+ 
+    /* check for illegal Unicode chars */
+    if ((error[0]=='\0') && !validUTF8Char(unicode)) {
+      snprintf(buf,sizeof(buf),"illegal UTF-8 code: 0x%04X",unicode);
+      strncat(error,buf,sizeof(error));
+    }
+
     if (error[0]=='\0') {
-      if (checkXMLChars && !validXMLChar(unicode)) {
-        snprintf(error,sizeof(error),"code not allowed in XML: 0x%04X",unicode);
+      if (checkXML1_0Chars && !validXML1_0Char(unicode)) {
+        snprintf(error,sizeof(error),"code not allowed in XML1.0: 0x%04X",unicode);
+      } else if (checkXML1_1Chars && !validXML1_1Char(unicode)) {
+        snprintf(error,sizeof(error),"code not allowed in XML1.1: 0x%04X",unicode);
       } else { 
         for (k=0; badChars[k]!=0; k++) {
           if (unicode==badChars[k]) {
@@ -257,19 +296,6 @@ and errors/warnings to stderr.\n\n", argv[0]);
       } 
     }
   
-    /* check for illegal Unicode chars */
-    if ((error[0]=='\0') && !validUTF8Char(unicode)) {
-      snprintf(buf,sizeof(buf),"illegal UTF-8 code: 0x%04X",unicode);
-      strncat(error,buf,sizeof(error));
-    }
-
-    /* check for overlong encodings if no error already */
-    if ((error[0]=='\0') && checkOverlong && contBytes>0 
-                         && (unicode<=highestCharInNBytes[contBytes-1])) {
-      snprintf(buf,sizeof(buf),"overlong encoding, not safe: 0x%04X",unicode);
-      strncat(error,buf,sizeof(error));
-    }
- 
 
     if (error[0]!='\0') {
       numErrors++;
@@ -278,7 +304,7 @@ and errors/warnings to stderr.\n\n", argv[0]);
          * make substitution for at least the first char.
          */
         for (k=0; k<=j; k++) {
-          if (byte[k]>0x7F || (checkXMLChars && !validXMLChar((unsigned int)byte[j]))) {
+          if (byte[k]>0x7F || (checkXML1_0Chars && !validXML1_0Char((unsigned int)byte[j]))) {
             byte[k]=substituteChar;
           }
         }
@@ -296,7 +322,16 @@ and errors/warnings to stderr.\n\n", argv[0]);
 	snprintf(buf,sizeof(buf),", substituted 0x%02X", byte[0]);
         strncat(error, buf, sizeof(error));
       }
+    } else { 
+      /* Finally check for restricted chars that we do a NCR substitution for */
+      if (checkXML1_1Restricted && restrictedXML1_1Char(unicode)) {
+        j=snprintf(buf,sizeof(buf),"&#x%X",unicode);
+        for (k=0; k<=j; k++) { byte[k]=(int)buf[k]; } /* copy char array to int array */
+        snprintf(error,sizeof(error),"code restricted in XML1.1: 0x%04X, substituted NCR: '%s'",unicode,buf);
+      }
+    }
 
+    if (error[0]!='\0') {
       if (!quiet && (numErrors<=maxErrors || maxErrors==0)) {
         fprintf(stderr,"Line %ld, char %ld, byte %ld: %s\n",
                 linenum,charnum,bytenum,error);
@@ -304,7 +339,7 @@ and errors/warnings to stderr.\n\n", argv[0]);
       contBytes=j-1;
     }
 
-    if (!check) { 
+    if (!checkOnly) { 
       for (k=0; k<=contBytes; k++) {
         putc(byte[k],stdout);
       }
@@ -322,9 +357,14 @@ and errors/warnings to stderr.\n\n", argv[0]);
  * that do not represent legal characters in Unicode.
  *
  * From Unicode 3.2 (http://www.unicode.org/unicode/reports/tr28/#3_1_conformance) 
- * U+D800..U+DFFF ill-formed 
+ * UxD800..UxDFFF are ill-formed 
  *
- * Ux10FFFF is highest UTF-8 char
+ * UTF-8 is defined by http://www.ietf.org/rfc/rfc3629.txt
+ * (and obsoletes http://www.ietf.org/rfc/rfc2279.txt which, in turn
+ * obsoletes http://www.ietf.org/rfc/rfc2044.txt )
+ *
+ * Ux10FFFF is highest legal UTF-8 code
+ * RFC2279 permitted codes greater than Ux10FFFF but RFC3629 does not. 
  */
 int validUTF8Char(unsigned int ch) {
   return((ch<0xD800 || ch>0xDFFF) && ch<=0x10FFFF);
@@ -347,16 +387,44 @@ int validUTF8Char(unsigned int ch) {
  * Char ::= #x9 | #xA | #xD | [#x20-#xD7FF] | [#xE000-#xFFFD] |
  *                            [#x10000-#x10FFFF]
  * [end excerpt]
- *
- * We are not here concerned with the range #x10000-#x10FFFF since these
- * are used only for UTF-16 endcoding of UCS-4 (64bit characters). This
- * code assumes UTF-8 encoding of UCS-2 (32 bit characters) and would need
- * modification to handle UTF-8 encoding of UTF-16.
  */
-int validXMLChar(unsigned int ch) {
+int validXML1_0Char(unsigned int ch) {
   return(ch==0x09 || ch==0x0A || ch==0x0D ||
          (ch>=0x20 && ch<=0xD7FF) ||
-         (ch>=0xE000 && ch<=0xFFFD)); 
+         (ch>=0xE000 && ch<=0xFFFD) ||
+         (ch>=0x10000 && ch<=0x10FFFF)); 
+} 
+
+/* From http://www.w3.org/TR/xml11/#charsets
+ * (sec 2.2, extracted 23Dec2003)
+ * 
+ * Char ::=  [#x1-#xD7FF] | [#xE000-#xFFFD] | [#x10000-#x10FFFF]  
+ * RestrictedChar ::= [#x1-#x8] | [#xB-#xC] | [#xE-#x1F] | 
+ *                    [#x7F-#x84] | [#x86-#xBF]
+ *
+ * Spec doesn't seem to say what one should do about RestricterChar.
+ * However, http://www.w3.org/International/questions/qa-controls.html
+ * says:
+ *
+ * In XML 1.1 (which is still in Candidate Recommendation stage), if you 
+ * need to represent a control code explicitly the simplest alternative 
+ * is to use an NCR (numeric character reference). For example, the control 
+ * code ESC (Escape) U+001B would be represented by either the &#x1B; 
+ * (hexadecimal) or &#27; (decimal) Numeric Character References.
+ *
+ */
+int validXML1_1Char(unsigned int ch) {
+  return((ch>=0x1 && ch<=0xD7FF) ||
+         (ch>=0xE000 && ch<=0xFFFD) ||
+         (ch>=0x10000 && ch<=0x10FFFF)); 
+} 
+
+int restrictedXML1_1Char(unsigned int ch) {
+  return((ch>=0x1 && ch<=0x8) ||
+         (ch>=0xB && ch<=0xC) ||
+         (ch>=0xE && ch<=0x1F) ||
+         (ch>=0x7F && ch<=0x84) ||
+         (ch>=0x86 && ch<=0xBF));
 } 
 
 
