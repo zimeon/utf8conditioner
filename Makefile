@@ -1,10 +1,10 @@
 # Makefile for utf8conditioner
 # Simeon Warner - July 2001...
-# [CVS: $Id: Makefile,v 1.4 2003/01/14 20:38:10 simeon Exp $
+# [CVS: $Id: Makefile,v 1.5 2003/04/15 03:02:34 simeon Exp $
 
 OBJ = utf8conditioner.o getopt.o
 EXECUTABLE = utf8conditioner
-PACKAGE = utf8/utf8conditioner.c utf8/getopt.c utf8/getopt.h utf8/Makefile utf8/testfile utf8/COPYING utf8/README
+PACKAGE = utf8/utf8conditioner.c utf8/getopt.c utf8/getopt.h utf8/Makefile utf8/testfile utf8/COPYING utf8/README utf8/HISTORY
 
 CC = gcc
 LIBS = 
