@@ -1,29 +1,32 @@
 /* UTF-8 checker and conditioner
- * Simeon Warner - 10July2001 
+ * Simeon Warner - 10July2001... 
  *
- * Designed for use with Open Archive Initiative (OAI, 
+ * Designed for use with Open Archives Initiative (OAI, 
  * see: http://www.openarchives.org/) harvesting software. Aims to 
- * `fix' bad characters in UTF-8 encode XML so that XML parsers will
+ * `fix' bad characters in UTF-8 encoded XML so that XML parsers will
  * be able to parse it (albeit with some corruption introduced by
  * substitution of dummy characters in place of invalid ones).
  *
- * I assume that the most likely cause of errors is inclusion of non-UTF8
+ * I assume that the most likely cause of errors is inclusion of non-UTF-8
  * bytes from various 8-bit character sets. Thus, any attempt to read a
  * sequence of continuation bytes that finds an invalid byte will result
- * in the termination of the attempt to read the multi-byte character. The
- * hope is that this will avoid an error having run-on effects which might
- * interfere with XML markup.
+ * in the termination of the attempt to read the multi-byte character. Each
+ * valid single byte will be written out, invalid single bytes will be 
+ * replaced with a dummy character. The hope is that this will avoid an 
+ * error having run-on effects which might interfere with XML markup.
+ * (Option -m changes this behaviour to replace with invalid multi-byte 
+ * with a single dummy character.)
  *
  * Bugs:
  * - no protection against overflow of byte, character and line counters
  *   (unsigned long int). Will result in incorrect output messages.
  * - doesn't handle UTF-8 encoding of UTF-16/UCS-4. 
  *
- * [CVS: $Id: utf8conditioner.c,v 1.5 2001/07/31 03:39:34 simeon Exp $]
+ * [CVS: $Id: utf8conditioner.c,v 1.6 2001/08/01 20:59:43 simeon Exp $]
  */
 
 #include <stdio.h>
-extern int snprintf(char *str, size_t size, const  char  *format, ...);
+extern int snprintf(char *str, size_t size, const char *format, ...);
 #include <string.h>
 #include <stdlib.h> /* for strtoul() */
 #include "getopt.h" /* for getopt(), could use unistd on Unix */ 
@@ -38,46 +41,61 @@ int validXMLChar(unsigned int ch);
 
 
 int main (int argc, char* argv[]) {
-  int j;
+  int j,k;
   int ch;
-  char error[200];               /* place to build error string */
-  char buf[50];                  /* tmp used when building error string */ 
+  char error[200];                /* place to build error string */
+  char buf[50];                   /* tmp used when building error string */ 
 
-  int byte[6];                   /* bytes of UTF-8 char */
-  int contBytes;                 /* number of continuation bytes (0-5) */
-  unsigned long int bytenum=0;   /* count of bytes read */
-  unsigned long int charnum=0;   /* count of characters read */
-  unsigned long int linenum=1;   /* count of lines */
-  unsigned int unicode;          /* Unicode character represented by UTF-8 */
+  int byte[6];                    /* bytes of UTF-8 char */
+  int contBytes;                  /* number of continuation bytes (0-5) */
+  unsigned long int bytenum=0;    /* count of bytes read */
+  unsigned long int charnum=0;    /* count of characters read */
+  unsigned long int linenum=1;    /* count of lines */
+  unsigned int unicode;           /* Unicode character represented by UTF-8 */
  
-  int maxErrors=100;             /* max number of error messages to print */
-  int numErrors=0;               /* count of errors */   
-  int quiet=0;                   /* quiet option */
-  int substituteChar = '?';      /* substitute for bad characters */
-  int checkXMLChars=1;           /* XML checks option */
+  int maxErrors=100;              /* max number of error messages to print */
+  int numErrors=0;                /* count of errors */   
+  int quiet=0;                    /* quiet option */
+  int check=0;                    /* check only option */
+  int substituteChar = '?';       /* substitute for bad characters */
+  int checkXMLChars=1;            /* XML checks option */
+  int badMultibyteToSingleChar=0; /* -m option */
 
-  int badChar=0;                 /* variables for bad characters option */ 
+  int badChar=0;                  /* variables for bad characters option */ 
   unsigned int badChars[MAX_BAD_CHAR];
-  badChars[badChar] = '\0'; /* terminator */
+  badChars[badChar] = 0;          /* terminator */
 
   /*
    * Read any options
    */
-  while ((j=getopt(argc,argv,"hqb:e:xs:"))!=EOF) {
+  while ((j=getopt(argc,argv,"hqce:b:s:xm"))!=EOF) {
     switch (j) {
       case '?':
       case 'h': 
-        fprintf(stderr,"usage: %s [-q] [-b char] [-x] [-s char] [-h]\n"
-          "  -q   quiet, no output messages\n"   
-          "  -b   add Unicode character char to list of bad characters (decimal, 0octal, 0xhex)\n"  
+        /* string split to meet ISO C89 requirement of <=509 chars */
+        fprintf(stderr,
+          "usage: %s [-q] [-c] [-e num] [[-b char]] [-x] [-s char] [-h]\n"
+          "Takes UTF-8 input from stdin, writes processed UTF-8 to stdout\n"
+	  "and errors/warnings to stderr.\n\n", argv[0]);
+        fprintf(stderr,
+          "  -q   quiet, no output messages to stderr\n"
+          "  -c   just check, no output of XML to stdout\n"   
           "  -e   number of error messages to print (currently %d, 0 for unlimited)\n"
-          "  -x   do NOT remove characters not allowed in UTF-8 XML streams\n"
+          "  -b   add Unicode character char to list of bad characters (decimal, 0octal, 0xhex),\n"
+  	  "       use multiple times at add multiple characters\n", maxErrors);
+        fprintf(stderr,
           "  -s   change character substituted for bad characters (currently '%c')\n"
-          "  -h   this help\n\n", argv[0], maxErrors, substituteChar);  
+          "  -m   replace invalid multi-byte sequence with single dummy character\n"
+          "  -x   do NOT remove characters not allowed in UTF-8 XML streams\n"
+          "       (valid: #x9 | #xA | #xD | [#x20-#xD7FF] | [#xE000-#xFFFD] | [#x10000-#x10FFFF])\n"
+          "  -h   this help\n\n", substituteChar);  
         exit(1);
       case 'q':
         quiet=1;
         break;
+      case 'c':
+        check=1;
+        break; 
       case 'b':
         if (badChar>=(MAX_BAD_CHAR-1)) {
           fprintf(stderr,"Too many bad characters specified, limit %d.\n", 
@@ -90,12 +108,15 @@ int main (int argc, char* argv[]) {
       case 'e':
         maxErrors=(int)strtoul(optarg,NULL,0);
         break;
-      case 'x':
-        checkXMLChars=0;
-        break; 
       case 's':
         substituteChar = optarg[0];
         break;
+      case 'm':
+        badMultibyteToSingleChar=1;
+        break;
+      case 'x':
+        checkXMLChars=0;
+        break; 
     }
   }
 
@@ -141,30 +162,37 @@ int main (int argc, char* argv[]) {
     for (j=1; j<=contBytes; j++) {
       if ((ch=getc(stdin))!=EOF) {
         bytenum++;
+	byte[j]=ch;
         if ((ch&0xC0)!=0x80) {
           /* doesn't match 10xxxxxx */
-	  snprintf(buf,sizeof(buf),"byte %d isn't continuation: 0x%02X", (j+1), ch);
+	  snprintf(buf,sizeof(buf),"byte %d isn't continuation:",(j+1));
+          strncat(error, buf, sizeof(error));
+          for (k=0; k<=j; k++) {
+            snprintf(buf,sizeof(buf)," 0x%02X", byte[k]);
+            strncat(error, buf, sizeof(error));
+          }
+	  snprintf(buf,sizeof(buf),", restart at 0x%02X",ch);
           strncat(error, buf, sizeof(error));
 	  ungetc(ch,stdin);
 	  bytenum--;
 	  break;
         }
-	byte[j]=ch;
         unicode = (unicode << 6) + (ch&0x3F);
       } else {
         snprintf(buf,sizeof(buf),"premature EOF at byte %ld, should be byte %d of character",
 	         bytenum, j);
         strncat(error,buf,sizeof(error));
+        break;
       }
     }
 
     if (error[0]=='\0') {
-      j=-1;
+      k=-1;
       if (checkXMLChars && !validXMLChar(unicode)) {
         snprintf(error,sizeof(error),"character not allowed in XML: 0x%04X",unicode);
       } else { 
-        while (badChars[++j]!=0) {
-          if (unicode==badChars[j]) {
+        while (badChars[++k]!=0) {
+          if (unicode==badChars[k]) {
             snprintf(error,sizeof(error),"bad character: 0x%04X", unicode);
             break;
           }
@@ -174,14 +202,41 @@ int main (int argc, char* argv[]) {
 
     if (error[0]!='\0') {
       numErrors++;
-      if (!quiet && (numErrors<=maxErrors || maxErrors==0)) {
-        fprintf(stderr,"Line %ld, byte %ld, char %ld: %s\n",
-                linenum,bytenum,charnum,error);
+      if (!badMultibyteToSingleChar && j>1) {
+        /* now test individual bytes of bad multibyte char, will always
+         * make substitution for at least the first char.
+         */
+        for (k=0; k<=j; k++) {
+          if (byte[k]>0x7F || (checkXMLChars && !validXMLChar((unsigned int)byte[j]))) {
+            byte[k]=substituteChar;
+          }
+        }
+	snprintf(buf,sizeof(buf),", substituted ");
+        strncat(error, buf, sizeof(error));
+        for (k=0; k<=(j-1); k++) {
+          snprintf(buf,sizeof(buf)," 0x%02X", byte[k]);
+          strncat(error, buf, sizeof(error));
+        }
+      } else {
+        /* substitute one char for all bytes of bad multibyte char
+         */
+        byte[0]=substituteChar;
+        j=1;
+	snprintf(buf,sizeof(buf),", substituted 0x%02X", byte[0]);
+        strncat(error, buf, sizeof(error));
       }
-      putc(substituteChar,stdout);
+      if (!quiet && (numErrors<=maxErrors || maxErrors==0)) {
+        fprintf(stderr,"Line %ld, char %ld, byte %ld: %s\n",
+                linenum,charnum,bytenum,error);
+      }
+      if (!check) { 
+        for (k=0; k<=(j-1); k++) {
+          putc(byte[k],stdout);
+        }
+      }
     } else {
       for (j=0; j<=contBytes; j++) {
-        putc(byte[j],stdout);
+        if (!check) { putc(byte[j],stdout); }
       }
     }   
   }
