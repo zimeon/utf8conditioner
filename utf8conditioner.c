@@ -19,20 +19,23 @@
  *   (unsigned long int). Will result in incorrect output messages.
  * - doesn't handle UTF-8 encoding of UTF-16/UCS-4. 
  *
- * [CVS: $Id: utf8conditioner.c,v 1.3 2001/07/19 16:53:40 simeon Exp $]
+ * [CVS: $Id: utf8conditioner.c,v 1.4 2001/07/27 03:36:51 simeon Exp $]
  */
 
 #include <stdio.h>
+extern int snprintf(char *str, size_t size, const  char  *format, ...);
 #include <string.h>
 #include <stdlib.h> /* for strtoul() */
 #include "getopt.h" /* for getopt(), could use unistd on Unix */ 
 
 #define MAX_BAD_CHAR 100
-  
+
+
 extern const char *optarg;
 extern int getopt (int argc, char *const *argv, const char *shortopts);
 
 int validXMLChar(unsigned int ch);
+
 
 int main (int argc, char* argv[]) {
   int j;
@@ -124,7 +127,7 @@ int main (int argc, char* argv[]) {
       /* 0400 0000-7FFF FFFF   1111110x 10xxxxxx ... 10xxxxxx */
       contBytes=5;
     } else {
-      if (!quiet) { sprintf(error,"illegal byte: 0x%02x", ch); }
+      if (!quiet) { snprintf(error,sizeof(error),"illegal byte: 0x%02x", ch); }
       contBytes=0;
     }
     byte[0]=ch;
@@ -135,8 +138,8 @@ int main (int argc, char* argv[]) {
         bytenum++;
         if ((ch&0xA0)!=0x80) {
           /* doesn't match 10xxxxxx */
-	  sprintf(buf,"byte %d isn't continuation: 0x%02x", (j+1), ch);
-          strcat(error, buf);
+	  snprintf(buf,sizeof(buf),"byte %d isn't continuation: 0x%02x", (j+1), ch);
+          strncat(error, buf, sizeof(error));
 	  ungetc(ch,stdin);
 	  bytenum--;
 	  break;
@@ -144,20 +147,20 @@ int main (int argc, char* argv[]) {
 	byte[j]=ch;
         unicode = (unicode << 6) + (ch&0x3F);
       } else {
-        sprintf(buf,"premature EOF at byte %ld, should be byte %d of character",
-	        bytenum, j);
-        strcat(error,buf);
+        snprintf(buf,sizeof(buf),"premature EOF at byte %ld, should be byte %d of character",
+	         bytenum, j);
+        strncat(error,buf,sizeof(error));
       }
     }
 
     if (error[0]=='\0') {
       j=-1;
       if (checkXMLChars && !validXMLChar(unicode)) {
-        sprintf(error,"character not allowed in XML: 0x%04x",unicode);
+        snprintf(error,sizeof(error),"character not allowed in XML: 0x%04x",unicode);
       } else { 
         while (badChars[++j]!=0) {
           if (unicode==badChars[j]) {
-            sprintf(error,"bad character: 0x%04x", unicode);
+            snprintf(error,sizeof(error),"bad character: 0x%04x", unicode);
             break;
           }
         }
