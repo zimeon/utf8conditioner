@@ -4,6 +4,11 @@ This file tracks bug fixes and improvements, it is indexed by the CVS
 revision number of the file utf8conditioner.c (which is very nearly
 the entire code).
 
+v1.11 2003/06/27 19:20:26
+  Changed names of optind and optarg to avoid conflict with systems
+  that include getopt as part of stdlib. Problem pointed out on
+  Solaris 9 system.
+
 v1.10 2003/04/15 02:54:43
   Fixes bug with -q option. Would previously report but not fix bad
   characters with -q flag set. Thanks to Naomi Dushay for pointing out
@@ -13,4 +18,4 @@ v1.9 2003/01/14 19:31:09
   First public release.
 
 
-$Id: HISTORY,v 1.1 2003/04/15 03:02:34 simeon Exp $
+$Id: HISTORY,v 1.2 2003/06/27 19:24:18 simeon Exp $
