@@ -1,0 +1,31 @@
+utf8conditioner
+---------------
+
+Takes UTF-8 input from stdin, writes processed UTF-8 to stdout
+and errors/warnings to stderr. Developed as a tool for checking and
+pre-processing UTF-8 encoded XML responses to OAI-PMH requests
+(see http://www.openarchives.org/).
+
+This program aims to `fix' bad codes in UTF-8 encoded XML so that 
+XML parsers will be able to parse it (albeit with some corruption 
+introduced by substitution of dummy characters in place of illegal 
+codes). Even though data may need to be discarded as unreliable it
+may still be possible to extract any <resumptionToken> element to
+see if a harvest was complete or not.
+
+
+COMPILING
+
+This program has been developed on Linux using gcc but should compile 
+with on other systems with an ANSI C compiler.
+
+On Linux with gcc:
+
+> make
+> ./utf8conditioner -h    	[will display help]
+
+To use another compiler, change the CC = gcc line in the Makefile.
+
+
+Simeon Warner, simeon@cs.cornell.edu
+$Id: README,v 1.1 2003/01/14 19:31:09 simeon Exp $
