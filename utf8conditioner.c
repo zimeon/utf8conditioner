@@ -28,7 +28,7 @@
  *   (unsigned long int). Will result in incorrect output messages.
  * - doesn't handle UTF-8 encoding of UTF-16/UCS-4. 
  *
- * [CVS: $Id: utf8conditioner.c,v 1.9 2003/01/14 19:31:09 simeon Exp $]
+ * [CVS: $Id: utf8conditioner.c,v 1.10 2003/04/15 02:54:43 simeon Exp $]
  */
 
 #define PROGRAM_NOTICE "\
@@ -217,7 +217,7 @@ and errors/warnings to stderr.\n\n", argv[0]);
       contBytes=5;
       unicode=(ch&0x01);
     } else {
-      if (!quiet) { snprintf(error,sizeof(error),"illegal byte: 0x%02X", ch); }
+      snprintf(error,sizeof(error),"illegal byte: 0x%02X", ch);
       contBytes=0;
     }
     byte[0]=ch;
