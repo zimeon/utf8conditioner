@@ -28,7 +28,7 @@
  *   (unsigned long int). Will result in incorrect output messages.
  * - doesn't handle UTF-8 encoding of UTF-16/UCS-4. 
  *
- * [CVS: $Id: utf8conditioner.c,v 1.10 2003/04/15 02:54:43 simeon Exp $]
+ * [CVS: $Id: utf8conditioner.c,v 1.11 2003/06/27 19:20:26 simeon Exp $]
  */
 
 #define PROGRAM_NOTICE "\
@@ -63,10 +63,6 @@ extern int snprintf(char *str, size_t size, const char *format, ...);
 #include "getopt.h" /* for getopt(), could use unistd on Unix */ 
 
 #define MAX_BAD_CHAR 100
-
-extern const char *optarg;
-extern const int optind;
-extern int getopt (int argc, char *const *argv, const char *shortopts);
 
 int validUnicodeChar(unsigned int ch);
 int validXMLChar(unsigned int ch);
@@ -150,14 +146,14 @@ and errors/warnings to stderr.\n\n", argv[0]);
           fprintf(stderr,"Too many bad codes specified (limit %d), aborting!\n", MAX_BAD_CHAR);
           exit(1); 
         } 
-        badChars[badChar++]=(int)strtoul(optarg,NULL,0);
+        badChars[badChar++]=(int)strtoul(utf8_optarg,NULL,0);
         badChars[badChar]=0;
         break;
       case 'e':
-        maxErrors=(int)strtoul(optarg,NULL,0);
+        maxErrors=(int)strtoul(utf8_optarg,NULL,0);
         break;
       case 's':
-        substituteChar = optarg[0];
+        substituteChar = utf8_optarg[0];
         break;
       case 'm':
         badMultiByteToMultiChar=1;
@@ -179,7 +175,7 @@ and errors/warnings to stderr.\n\n", argv[0]);
    * Barf if anything on command line left unread (probably an attempt to 
    * specify a file name instead of using stdin)
    */
-  if (argc>optind) {
+  if (argc>utf8_optind) {
     fprintf(stderr,"Unknown parameters specified on command line (-h for help), aborting!\n");
     exit(1); 
   }

@@ -43,9 +43,9 @@ static char sccsid[] = "@(#)getopt.c	4.13 (Berkeley) 2/23/91";
  * get option letter from argument vector
  */
 int	opterr = 1,		/* if error message should be printed */
-	optind = 1,		/* index into parent argv vector */
+	utf8_optind = 1,		/* index into parent argv vector */
 	optopt;			/* character checked for validity */
-const char	*optarg;		/* argument associated with option */
+const char	*utf8_optarg;		/* argument associated with option */
 
 #define	BADCH	(int)'?'
 #define	EMSG	""
@@ -61,12 +61,12 @@ getopt(nargc, nargv, ostr)
 	char *p;
 
 	if (!*place) {				/* update scanning pointer */
-		if (optind >= nargc || *(place = nargv[optind]) != '-') {
+		if (utf8_optind >= nargc || *(place = nargv[utf8_optind]) != '-') {
 			place = EMSG;
 			return(EOF);
 		}
 		if (place[1] && *++place == '-') {	/* found "--" */
-			++optind;
+			++utf8_optind;
 			place = EMSG;
 			return(EOF);
 		}
@@ -80,7 +80,7 @@ getopt(nargc, nargv, ostr)
 		if (optopt == (int)'-')
 			return(EOF);
 		if (!*place)
-			++optind;
+			++utf8_optind;
 		if (opterr) {
 			if (!(p = strrchr(*nargv, '/')))
 				p = *nargv;
@@ -92,14 +92,14 @@ getopt(nargc, nargv, ostr)
 		return(BADCH);
 	}
 	if (*++oli != ':') {			/* don't need argument */
-		optarg = NULL;
+		utf8_optarg = NULL;
 		if (!*place)
-			++optind;
+			++utf8_optind;
 	}
 	else {					/* need an argument */
 		if (*place)			/* no white space */
-			optarg = place;
-		else if (nargc <= ++optind) {	/* no arg */
+			utf8_optarg = place;
+		else if (nargc <= ++utf8_optind) {	/* no arg */
 			place = EMSG;
 			if (!(p = strrchr(*nargv, '/')))
 				p = *nargv;
@@ -112,9 +112,9 @@ getopt(nargc, nargv, ostr)
 			return(BADCH);
 		}
 	 	else				/* white space */
-			optarg = nargv[optind];
+			utf8_optarg = nargv[utf8_optind];
 		place = EMSG;
-		++optind;
+		++utf8_optind;
 	}
 	return(optopt);				/* dump back option letter */
 }
