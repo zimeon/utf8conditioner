@@ -1,13 +1,14 @@
-01: $Id: testfile,v 1.3 2001/08/01 20:59:43 simeon Exp $
+01: $Id: testfile,v 1.4 2005/10/17 20:36:05 simeon Exp $
 02: Test file for utf8conditioner, Simeon Warner 1Aug2001
 03: 0xXX are the hex values of the bytes that follow 
 04: -----------------------------------------------------
 05: valid 2 byte (0xCF 0x8F) œè
-06: valid 3 byte (0xEF 0x81 0x81) Ôèè
+06: valid 3 byte (0xEF 0x8F 0x8F) Ôèè
 07: invalid 2 byte (0xCF a) œa
 08: invalid 3 byte (0xEF 0x81 a) ÔÅa
 09: illegal byte in UTF-8 (0xB0) ∞ 
 10: not allowed in XML (0x0B)  
 11: bye
+
 
 
