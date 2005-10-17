@@ -1,10 +1,10 @@
 # Makefile for utf8conditioner
 # Simeon Warner - July 2001...
-# [CVS: $Id: Makefile,v 1.9 2005/10/17 21:27:33 simeon Exp $
+# [CVS: $Id: Makefile,v 1.10 2005/10/17 21:30:35 simeon Exp $
 
 OBJ = utf8conditioner.o getopt.o
 EXECUTABLE = utf8conditioner
-PACKAGE = utf8/utf8conditioner.c utf8/getopt.c utf8/getopt.h utf8/Makefile utf8/testfile utf8/COPYING utf8/README utf8/HISTORY test
+PACKAGE = utf8/utf8conditioner.c utf8/getopt.c utf8/getopt.h utf8/Makefile utf8/COPYING utf8/README utf8/HISTORY utf8/test
 TEST_TMP = /tmp/utf8conditioner_test
 
 CC = gcc
@@ -23,13 +23,16 @@ utf8conditioner.o: utf8conditioner.c getopt.h
 getopt.o: getopt.c getopt.h
 	$(CC) $(CFLAGS) -c getopt.c
 
+.PHONY: clean
 clean:
 	rm -f $(OBJ) $(EXECUTABLE)
 
+.PHONY: tar
 tar:
 	cd ..;tar -zcf /tmp/utf8conditioner.tar.gz $(PACKAGE); cd utf8
 	ls -l /tmp/utf8conditioner.tar.gz
 
+.PHONY: zip
 zip:
 	cd ..;zip /tmp/utf8conditioner.zip $(PACKAGE); cd utf8  
 	ls -l /tmp/utf8conditioner.zip
