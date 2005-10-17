@@ -1,10 +1,10 @@
 # Makefile for utf8conditioner
 # Simeon Warner - July 2001...
-# [CVS: $Id: Makefile,v 1.8 2005/10/17 21:13:56 simeon Exp $
+# [CVS: $Id: Makefile,v 1.9 2005/10/17 21:27:33 simeon Exp $
 
 OBJ = utf8conditioner.o getopt.o
 EXECUTABLE = utf8conditioner
-PACKAGE = utf8/utf8conditioner.c utf8/getopt.c utf8/getopt.h utf8/Makefile utf8/testfile utf8/COPYING utf8/README utf8/HISTORY
+PACKAGE = utf8/utf8conditioner.c utf8/getopt.c utf8/getopt.h utf8/Makefile utf8/testfile utf8/COPYING utf8/README utf8/HISTORY test
 TEST_TMP = /tmp/utf8conditioner_test
 
 CC = gcc
@@ -34,39 +34,40 @@ zip:
 	cd ..;zip /tmp/utf8conditioner.zip $(PACKAGE); cd utf8  
 	ls -l /tmp/utf8conditioner.zip
 
+.PHONY: test
 test:
 	@echo -n "test[01] - option -c ..................... "
-	@cat testfile | ./$(EXECUTABLE) -c 2> $(TEST_TMP)
-	@r=`diff -I 'Id' $(TEST_TMP) test-result-c.txt 2>&1`
+	@cat test/testfile | ./$(EXECUTABLE) -c 2> $(TEST_TMP)
+	@r=`diff -I 'Id' $(TEST_TMP) test/test-result-c.txt 2>&1`
 	@if [ -n "$r" ]; then echo "FAILED"; else echo "PASS"; fi
 	@echo -n "test[02] - options -c -x.................. "
-	@cat testfile | ./$(EXECUTABLE) -c -x 2> $(TEST_TMP)
-	@r=`diff -I 'Id' $(TEST_TMP) test-result-cx.txt 2>&1`
+	@cat test/testfile | ./$(EXECUTABLE) -c -x 2> $(TEST_TMP)
+	@r=`diff -I 'Id' $(TEST_TMP) test/test-result-cx.txt 2>&1`
 	@if [ -n "$r" ]; then echo "FAILED"; else echo "PASS"; fi
 	@echo -n "test[03] - options -c -X 1.1.............. "
-	@cat testfile | ./$(EXECUTABLE) -c -X1.1 2> $(TEST_TMP)
-	@r=`diff -I 'Id' $(TEST_TMP) test-result-cX1.1.txt 2>&1`
+	@cat test/testfile | ./$(EXECUTABLE) -c -X1.1 2> $(TEST_TMP)
+	@r=`diff -I 'Id' $(TEST_TMP) test/test-result-cX1.1.txt 2>&1`
 	@if [ -n "$r" ]; then echo "FAIL"; else echo "PASS"; fi
 	@echo -n "test[04] - UTF-8-test-1 (good) ........... "
-	@cat UTF-8-test-1.txt | ./$(EXECUTABLE) -c 2> $(TEST_TMP)
+	@cat test/UTF-8-test-1.txt | ./$(EXECUTABLE) -c 2> $(TEST_TMP)
 	@if [ -S $(TEST_TMP) ]; then echo "FAIL"; else echo "PASS"; fi
 	@echo -n "test[05] - UTF-8-test-2 (good) ........... "
-	@cat UTF-8-test-2.txt | ./$(EXECUTABLE) -c 2> $(TEST_TMP)
+	@cat test/UTF-8-test-2.txt | ./$(EXECUTABLE) -c 2> $(TEST_TMP)
 	@if [ -S $(TEST_TMP) ]; then echo "FAIL"; else echo "PASS"; fi
 	@echo -n "test[06] - UTF-8-test-2-disallowed (bad) . "
-	@cat UTF-8-test-2-disallowed.txt | ./$(EXECUTABLE) -c 2> $(TEST_TMP)
-	@r=`diff -I 'Id' $(TEST_TMP) test-result-2-disallowed.txt 2>&1`
+	@cat test/UTF-8-test-2-disallowed.txt | ./$(EXECUTABLE) -c 2> $(TEST_TMP)
+	@r=`diff -I 'Id' $(TEST_TMP) test/test-result-2-disallowed.txt 2>&1`
 	@if [ -n "$r" ]; then echo "FAIL"; else echo "PASS"; fi
 	@echo -n "test[07] - UTF-8-test-3 (bad) ............ "
-	@cat UTF-8-test-3.txt | ./$(EXECUTABLE) -c 2> $(TEST_TMP)
-	@r=`diff -I 'Id' $(TEST_TMP) test-result-3.txt 2>&1`
+	@cat test/UTF-8-test-3.txt | ./$(EXECUTABLE) -c 2> $(TEST_TMP)
+	@r=`diff -I 'Id' $(TEST_TMP) test/test-result-3.txt 2>&1`
 	@if [ -n "$r" ]; then echo "FAIL"; else echo "PASS"; fi
 	@echo -n "test[08] - UTF-8-test-4 (bad) ............ "
-	@cat UTF-8-test-4.txt | ./$(EXECUTABLE) -c 2> $(TEST_TMP)
-	@r=`diff -I 'Id' $(TEST_TMP) test-result-4.txt 2>&1`
+	@cat test/UTF-8-test-4.txt | ./$(EXECUTABLE) -c 2> $(TEST_TMP)
+	@r=`diff -I 'Id' $(TEST_TMP) test/test-result-4.txt 2>&1`
 	@if [ -n "$r" ]; then echo "FAIL"; else echo "PASS"; fi
 	@echo -n "test[09] - UTF-8-test-5 (bad) ............ "
-	@cat UTF-8-test-5.txt | ./$(EXECUTABLE) -c 2> $(TEST_TMP)
-	@r=`diff -I 'Id' $(TEST_TMP) test-result-5.txt 2>&1`
+	@cat test/UTF-8-test-5.txt | ./$(EXECUTABLE) -c 2> $(TEST_TMP)
+	@r=`diff -I 'Id' $(TEST_TMP) test/test-result-5.txt 2>&1`
 	@if [ -n "$r" ]; then echo "FAIL"; else echo "PASS"; fi
 	@rm -f $(TEST_TMP)
