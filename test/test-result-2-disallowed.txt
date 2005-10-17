@@ -1,0 +1,7 @@
+$Id: test-result-2-disallowed.txt,v 1.1 2005/10/17 20:45:02 simeon Exp $
+Line 13, char 851, byte 855: illegal UTF-8 code: 0x200000, substituted 0x3F
+Line 14, char 931, byte 940: illegal UTF-8 code: 0x4000000, substituted 0x3F
+Line 18, char 1251, byte 1263: illegal UTF-8 code: 0x1FFFFF, substituted 0x3F
+Line 19, char 1331, byte 1347: illegal UTF-8 code: 0x3FFFFFF, substituted 0x3F
+Line 20, char 1411, byte 1432: illegal UTF-8 code: 0x7FFFFFFF, substituted 0x3F
+Line 24, char 1729, byte 1753: illegal UTF-8 code: 0x110000, substituted 0x3F

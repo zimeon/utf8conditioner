@@ -1,0 +1,5 @@
+$Id: test-result-cx.txt,v 1.1 2005/10/17 20:45:02 simeon Exp $
+Line 7, char 323, byte 326: byte 2 isn't continuation: 0xCF 0x61, restart at 0x61, substituted 0x3F
+Line 8, char 359, byte 363: byte 3 isn't continuation: 0xEF 0x81 0x61, restart at 0x61, substituted 0x3F
+Line 9, char 395, byte 399: illegal byte: 0xB0, substituted 0x3F
+Line 10, char 428, byte 432: code not allowed in XML1.0: 0x000B, substituted 0x3F

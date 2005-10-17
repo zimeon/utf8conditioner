@@ -1,0 +1,16 @@
+$Id: test-result-4.txt,v 1.1 2005/10/17 20:45:02 simeon Exp $
+Line 29, char 2277, byte 2278: illegal overlong encoding of 0x002F, substituted 0x3F
+Line 30, char 2357, byte 2360: illegal overlong encoding of 0x002F, substituted 0x3F
+Line 31, char 2437, byte 2443: illegal overlong encoding of 0x002F, substituted 0x3F
+Line 32, char 2517, byte 2527: illegal overlong encoding of 0x002F, substituted 0x3F
+Line 33, char 2597, byte 2612: illegal overlong encoding of 0x002F, substituted 0x3F
+Line 42, char 3322, byte 3338: illegal overlong encoding of 0x007F, substituted 0x3F
+Line 43, char 3402, byte 3420: illegal overlong encoding of 0x07FF, substituted 0x3F
+Line 44, char 3482, byte 3503: illegal overlong encoding of 0xFFFF, substituted 0x3F
+Line 45, char 3562, byte 3587: illegal overlong encoding of 0x1FFFFF, substituted 0x3F
+Line 46, char 3642, byte 3672: illegal overlong encoding of 0x3FFFFFF, substituted 0x3F
+Line 54, char 4278, byte 4309: illegal overlong encoding of 0x0000, substituted 0x3F
+Line 55, char 4358, byte 4391: illegal overlong encoding of 0x0000, substituted 0x3F
+Line 56, char 4438, byte 4474: illegal overlong encoding of 0x0000, substituted 0x3F
+Line 57, char 4518, byte 4558: illegal overlong encoding of 0x0000, substituted 0x3F
+Line 58, char 4598, byte 4643: illegal overlong encoding of 0x0000, substituted 0x3F

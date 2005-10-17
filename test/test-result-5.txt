@@ -1,0 +1,24 @@
+$Id: test-result-5.txt,v 1.1 2005/10/17 20:45:02 simeon Exp $
+Line 10, char 749, byte 751: illegal UTF-8 code: 0xD800, substituted 0x3F
+Line 11, char 829, byte 833: illegal UTF-8 code: 0xDB7F, substituted 0x3F
+Line 12, char 909, byte 915: illegal UTF-8 code: 0xDB80, substituted 0x3F
+Line 13, char 989, byte 997: illegal UTF-8 code: 0xDBFF, substituted 0x3F
+Line 14, char 1069, byte 1079: illegal UTF-8 code: 0xDC00, substituted 0x3F
+Line 15, char 1149, byte 1161: illegal UTF-8 code: 0xDF80, substituted 0x3F
+Line 16, char 1229, byte 1243: illegal UTF-8 code: 0xDFFF, substituted 0x3F
+Line 20, char 1565, byte 1581: illegal UTF-8 code: 0xD800, substituted 0x3F
+Line 20, char 1566, byte 1584: illegal UTF-8 code: 0xDC00, substituted 0x3F
+Line 21, char 1645, byte 1665: illegal UTF-8 code: 0xD800, substituted 0x3F
+Line 21, char 1646, byte 1668: illegal UTF-8 code: 0xDFFF, substituted 0x3F
+Line 22, char 1725, byte 1749: illegal UTF-8 code: 0xDB7F, substituted 0x3F
+Line 22, char 1726, byte 1752: illegal UTF-8 code: 0xDC00, substituted 0x3F
+Line 23, char 1805, byte 1833: illegal UTF-8 code: 0xDB7F, substituted 0x3F
+Line 23, char 1806, byte 1836: illegal UTF-8 code: 0xDFFF, substituted 0x3F
+Line 24, char 1885, byte 1917: illegal UTF-8 code: 0xDB80, substituted 0x3F
+Line 24, char 1886, byte 1920: illegal UTF-8 code: 0xDC00, substituted 0x3F
+Line 25, char 1965, byte 2001: illegal UTF-8 code: 0xDB80, substituted 0x3F
+Line 25, char 1966, byte 2004: illegal UTF-8 code: 0xDFFF, substituted 0x3F
+Line 26, char 2045, byte 2085: illegal UTF-8 code: 0xDBFF, substituted 0x3F
+Line 26, char 2046, byte 2088: illegal UTF-8 code: 0xDC00, substituted 0x3F
+Line 27, char 2125, byte 2169: illegal UTF-8 code: 0xDBFF, substituted 0x3F
+Line 27, char 2126, byte 2172: illegal UTF-8 code: 0xDFFF, substituted 0x3F

@@ -1,0 +1,182 @@
+$Id: test-result-3.txt,v 1.1 2005/10/17 20:45:02 simeon Exp $
+Line 8, char 599, byte 599: illegal byte: 0x80, substituted 0x3F
+Line 9, char 679, byte 679: illegal byte: 0xBF, substituted 0x3F
+Line 11, char 831, byte 831: illegal byte: 0x80, substituted 0x3F
+Line 11, char 832, byte 832: illegal byte: 0xBF, substituted 0x3F
+Line 12, char 911, byte 911: illegal byte: 0x80, substituted 0x3F
+Line 12, char 912, byte 912: illegal byte: 0xBF, substituted 0x3F
+Line 12, char 913, byte 913: illegal byte: 0x80, substituted 0x3F
+Line 13, char 991, byte 991: illegal byte: 0x80, substituted 0x3F
+Line 13, char 992, byte 992: illegal byte: 0xBF, substituted 0x3F
+Line 13, char 993, byte 993: illegal byte: 0x80, substituted 0x3F
+Line 13, char 994, byte 994: illegal byte: 0xBF, substituted 0x3F
+Line 14, char 1071, byte 1071: illegal byte: 0x80, substituted 0x3F
+Line 14, char 1072, byte 1072: illegal byte: 0xBF, substituted 0x3F
+Line 14, char 1073, byte 1073: illegal byte: 0x80, substituted 0x3F
+Line 14, char 1074, byte 1074: illegal byte: 0xBF, substituted 0x3F
+Line 14, char 1075, byte 1075: illegal byte: 0x80, substituted 0x3F
+Line 15, char 1151, byte 1151: illegal byte: 0x80, substituted 0x3F
+Line 15, char 1152, byte 1152: illegal byte: 0xBF, substituted 0x3F
+Line 15, char 1153, byte 1153: illegal byte: 0x80, substituted 0x3F
+Line 15, char 1154, byte 1154: illegal byte: 0xBF, substituted 0x3F
+Line 15, char 1155, byte 1155: illegal byte: 0x80, substituted 0x3F
+Line 15, char 1156, byte 1156: illegal byte: 0xBF, substituted 0x3F
+Line 16, char 1231, byte 1231: illegal byte: 0x80, substituted 0x3F
+Line 16, char 1232, byte 1232: illegal byte: 0xBF, substituted 0x3F
+Line 16, char 1233, byte 1233: illegal byte: 0x80, substituted 0x3F
+Line 16, char 1234, byte 1234: illegal byte: 0xBF, substituted 0x3F
+Line 16, char 1235, byte 1235: illegal byte: 0x80, substituted 0x3F
+Line 16, char 1236, byte 1236: illegal byte: 0xBF, substituted 0x3F
+Line 16, char 1237, byte 1237: illegal byte: 0x80, substituted 0x3F
+Line 20, char 1525, byte 1525: illegal byte: 0x80, substituted 0x3F
+Line 20, char 1526, byte 1526: illegal byte: 0x81, substituted 0x3F
+Line 20, char 1527, byte 1527: illegal byte: 0x82, substituted 0x3F
+Line 20, char 1528, byte 1528: illegal byte: 0x83, substituted 0x3F
+Line 20, char 1529, byte 1529: illegal byte: 0x84, substituted 0x3F
+Line 20, char 1530, byte 1530: illegal byte: 0x85, substituted 0x3F
+Line 20, char 1531, byte 1531: illegal byte: 0x86, substituted 0x3F
+Line 20, char 1532, byte 1532: illegal byte: 0x87, substituted 0x3F
+Line 20, char 1533, byte 1533: illegal byte: 0x88, substituted 0x3F
+Line 20, char 1534, byte 1534: illegal byte: 0x89, substituted 0x3F
+Line 20, char 1535, byte 1535: illegal byte: 0x8A, substituted 0x3F
+Line 20, char 1536, byte 1536: illegal byte: 0x8B, substituted 0x3F
+Line 20, char 1537, byte 1537: illegal byte: 0x8C, substituted 0x3F
+Line 20, char 1538, byte 1538: illegal byte: 0x8D, substituted 0x3F
+Line 20, char 1539, byte 1539: illegal byte: 0x8E, substituted 0x3F
+Line 20, char 1540, byte 1540: illegal byte: 0x8F, substituted 0x3F
+Line 21, char 1605, byte 1605: illegal byte: 0x90, substituted 0x3F
+Line 21, char 1606, byte 1606: illegal byte: 0x91, substituted 0x3F
+Line 21, char 1607, byte 1607: illegal byte: 0x92, substituted 0x3F
+Line 21, char 1608, byte 1608: illegal byte: 0x93, substituted 0x3F
+Line 21, char 1609, byte 1609: illegal byte: 0x94, substituted 0x3F
+Line 21, char 1610, byte 1610: illegal byte: 0x95, substituted 0x3F
+Line 21, char 1611, byte 1611: illegal byte: 0x96, substituted 0x3F
+Line 21, char 1612, byte 1612: illegal byte: 0x97, substituted 0x3F
+Line 21, char 1613, byte 1613: illegal byte: 0x98, substituted 0x3F
+Line 21, char 1614, byte 1614: illegal byte: 0x99, substituted 0x3F
+Line 21, char 1615, byte 1615: illegal byte: 0x9A, substituted 0x3F
+Line 21, char 1616, byte 1616: illegal byte: 0x9B, substituted 0x3F
+Line 21, char 1617, byte 1617: illegal byte: 0x9C, substituted 0x3F
+Line 21, char 1618, byte 1618: illegal byte: 0x9D, substituted 0x3F
+Line 21, char 1619, byte 1619: illegal byte: 0x9E, substituted 0x3F
+Line 21, char 1620, byte 1620: illegal byte: 0x9F, substituted 0x3F
+Line 22, char 1685, byte 1685: illegal byte: 0xA0, substituted 0x3F
+Line 22, char 1686, byte 1686: illegal byte: 0xA1, substituted 0x3F
+Line 22, char 1687, byte 1687: illegal byte: 0xA2, substituted 0x3F
+Line 22, char 1688, byte 1688: illegal byte: 0xA3, substituted 0x3F
+Line 22, char 1689, byte 1689: illegal byte: 0xA4, substituted 0x3F
+Line 22, char 1690, byte 1690: illegal byte: 0xA5, substituted 0x3F
+Line 22, char 1691, byte 1691: illegal byte: 0xA6, substituted 0x3F
+Line 22, char 1692, byte 1692: illegal byte: 0xA7, substituted 0x3F
+Line 22, char 1693, byte 1693: illegal byte: 0xA8, substituted 0x3F
+Line 22, char 1694, byte 1694: illegal byte: 0xA9, substituted 0x3F
+Line 22, char 1695, byte 1695: illegal byte: 0xAA, substituted 0x3F
+Line 22, char 1696, byte 1696: illegal byte: 0xAB, substituted 0x3F
+Line 22, char 1697, byte 1697: illegal byte: 0xAC, substituted 0x3F
+Line 22, char 1698, byte 1698: illegal byte: 0xAD, substituted 0x3F
+Line 22, char 1699, byte 1699: illegal byte: 0xAE, substituted 0x3F
+Line 22, char 1700, byte 1700: illegal byte: 0xAF, substituted 0x3F
+Line 23, char 1765, byte 1765: illegal byte: 0xB0, substituted 0x3F
+Line 23, char 1766, byte 1766: illegal byte: 0xB1, substituted 0x3F
+Line 23, char 1767, byte 1767: illegal byte: 0xB2, substituted 0x3F
+Line 23, char 1768, byte 1768: illegal byte: 0xB3, substituted 0x3F
+Line 23, char 1769, byte 1769: illegal byte: 0xB4, substituted 0x3F
+Line 23, char 1770, byte 1770: illegal byte: 0xB5, substituted 0x3F
+Line 23, char 1771, byte 1771: illegal byte: 0xB6, substituted 0x3F
+Line 23, char 1772, byte 1772: illegal byte: 0xB7, substituted 0x3F
+Line 23, char 1773, byte 1773: illegal byte: 0xB8, substituted 0x3F
+Line 23, char 1774, byte 1774: illegal byte: 0xB9, substituted 0x3F
+Line 23, char 1775, byte 1775: illegal byte: 0xBA, substituted 0x3F
+Line 23, char 1776, byte 1776: illegal byte: 0xBB, substituted 0x3F
+Line 23, char 1777, byte 1777: illegal byte: 0xBC, substituted 0x3F
+Line 23, char 1778, byte 1778: illegal byte: 0xBD, substituted 0x3F
+Line 23, char 1779, byte 1779: illegal byte: 0xBE, substituted 0x3F
+Line 23, char 1780, byte 1780: illegal byte: 0xBF, substituted 0x3F
+Line 30, char 2325, byte 2325: byte 2 isn't continuation: 0xC0 0x20, restart at 0x20, substituted 0x3F
+Line 30, char 2327, byte 2327: byte 2 isn't continuation: 0xC1 0x20, restart at 0x20, substituted 0x3F
+Line 30, char 2329, byte 2329: byte 2 isn't continuation: 0xC2 0x20, restart at 0x20, substituted 0x3F
+Line 30, char 2331, byte 2331: byte 2 isn't continuation: 0xC3 0x20, restart at 0x20, substituted 0x3F
+Line 30, char 2333, byte 2333: byte 2 isn't continuation: 0xC4 0x20, restart at 0x20, substituted 0x3F
+Line 30, char 2335, byte 2335: byte 2 isn't continuation: 0xC5 0x20, restart at 0x20, substituted 0x3F
+Line 30, char 2337, byte 2337: byte 2 isn't continuation: 0xC6 0x20, restart at 0x20, substituted 0x3F
+Line 30, char 2339, byte 2339: byte 2 isn't continuation: 0xC7 0x20, restart at 0x20, substituted 0x3F
+Line 30, char 2341, byte 2341: byte 2 isn't continuation: 0xC8 0x20, restart at 0x20, substituted 0x3F
+Line 30, char 2343, byte 2343: byte 2 isn't continuation: 0xC9 0x20, restart at 0x20, substituted 0x3F
+Line 30, char 2345, byte 2345: byte 2 isn't continuation: 0xCA 0x20, restart at 0x20, substituted 0x3F
+Line 30, char 2347, byte 2347: byte 2 isn't continuation: 0xCB 0x20, restart at 0x20, substituted 0x3F
+Line 30, char 2349, byte 2349: byte 2 isn't continuation: 0xCC 0x20, restart at 0x20, substituted 0x3F
+Line 30, char 2351, byte 2351: byte 2 isn't continuation: 0xCD 0x20, restart at 0x20, substituted 0x3F
+Line 30, char 2353, byte 2353: byte 2 isn't continuation: 0xCE 0x20, restart at 0x20, substituted 0x3F
+Line 30, char 2355, byte 2355: byte 2 isn't continuation: 0xCF 0x20, restart at 0x20, substituted 0x3F
+Line 31, char 2405, byte 2405: byte 2 isn't continuation: 0xD0 0x20, restart at 0x20, substituted 0x3F
+Line 31, char 2407, byte 2407: byte 2 isn't continuation: 0xD1 0x20, restart at 0x20, substituted 0x3F
+Line 31, char 2409, byte 2409: byte 2 isn't continuation: 0xD2 0x20, restart at 0x20, substituted 0x3F
+Line 31, char 2411, byte 2411: byte 2 isn't continuation: 0xD3 0x20, restart at 0x20, substituted 0x3F
+Line 31, char 2413, byte 2413: byte 2 isn't continuation: 0xD4 0x20, restart at 0x20, substituted 0x3F
+Line 31, char 2415, byte 2415: byte 2 isn't continuation: 0xD5 0x20, restart at 0x20, substituted 0x3F
+Line 31, char 2417, byte 2417: byte 2 isn't continuation: 0xD6 0x20, restart at 0x20, substituted 0x3F
+Line 31, char 2419, byte 2419: byte 2 isn't continuation: 0xD7 0x20, restart at 0x20, substituted 0x3F
+Line 31, char 2421, byte 2421: byte 2 isn't continuation: 0xD8 0x20, restart at 0x20, substituted 0x3F
+Line 31, char 2423, byte 2423: byte 2 isn't continuation: 0xD9 0x20, restart at 0x20, substituted 0x3F
+Line 31, char 2425, byte 2425: byte 2 isn't continuation: 0xDA 0x20, restart at 0x20, substituted 0x3F
+Line 31, char 2427, byte 2427: byte 2 isn't continuation: 0xDB 0x20, restart at 0x20, substituted 0x3F
+Line 31, char 2429, byte 2429: byte 2 isn't continuation: 0xDC 0x20, restart at 0x20, substituted 0x3F
+Line 31, char 2431, byte 2431: byte 2 isn't continuation: 0xDD 0x20, restart at 0x20, substituted 0x3F
+Line 31, char 2433, byte 2433: byte 2 isn't continuation: 0xDE 0x20, restart at 0x20, substituted 0x3F
+Line 31, char 2435, byte 2435: byte 2 isn't continuation: 0xDF 0x20, restart at 0x20, substituted 0x3F
+Line 36, char 2805, byte 2805: byte 2 isn't continuation: 0xE0 0x20, restart at 0x20, substituted 0x3F
+Line 36, char 2807, byte 2807: byte 2 isn't continuation: 0xE1 0x20, restart at 0x20, substituted 0x3F
+Line 36, char 2809, byte 2809: byte 2 isn't continuation: 0xE2 0x20, restart at 0x20, substituted 0x3F
+Line 36, char 2811, byte 2811: byte 2 isn't continuation: 0xE3 0x20, restart at 0x20, substituted 0x3F
+Line 36, char 2813, byte 2813: byte 2 isn't continuation: 0xE4 0x20, restart at 0x20, substituted 0x3F
+Line 36, char 2815, byte 2815: byte 2 isn't continuation: 0xE5 0x20, restart at 0x20, substituted 0x3F
+Line 36, char 2817, byte 2817: byte 2 isn't continuation: 0xE6 0x20, restart at 0x20, substituted 0x3F
+Line 36, char 2819, byte 2819: byte 2 isn't continuation: 0xE7 0x20, restart at 0x20, substituted 0x3F
+Line 36, char 2821, byte 2821: byte 2 isn't continuation: 0xE8 0x20, restart at 0x20, substituted 0x3F
+Line 36, char 2823, byte 2823: byte 2 isn't continuation: 0xE9 0x20, restart at 0x20, substituted 0x3F
+Line 36, char 2825, byte 2825: byte 2 isn't continuation: 0xEA 0x20, restart at 0x20, substituted 0x3F
+Line 36, char 2827, byte 2827: byte 2 isn't continuation: 0xEB 0x20, restart at 0x20, substituted 0x3F
+Line 36, char 2829, byte 2829: byte 2 isn't continuation: 0xEC 0x20, restart at 0x20, substituted 0x3F
+Line 36, char 2831, byte 2831: byte 2 isn't continuation: 0xED 0x20, restart at 0x20, substituted 0x3F
+Line 36, char 2833, byte 2833: byte 2 isn't continuation: 0xEE 0x20, restart at 0x20, substituted 0x3F
+Line 36, char 2835, byte 2835: byte 2 isn't continuation: 0xEF 0x20, restart at 0x20, substituted 0x3F
+Line 41, char 3205, byte 3205: byte 2 isn't continuation: 0xF0 0x20, restart at 0x20, substituted 0x3F
+Line 41, char 3207, byte 3207: byte 2 isn't continuation: 0xF1 0x20, restart at 0x20, substituted 0x3F
+Line 41, char 3209, byte 3209: byte 2 isn't continuation: 0xF2 0x20, restart at 0x20, substituted 0x3F
+Line 41, char 3211, byte 3211: byte 2 isn't continuation: 0xF3 0x20, restart at 0x20, substituted 0x3F
+Line 41, char 3213, byte 3213: byte 2 isn't continuation: 0xF4 0x20, restart at 0x20, substituted 0x3F
+Line 41, char 3215, byte 3215: byte 2 isn't continuation: 0xF5 0x20, restart at 0x20, substituted 0x3F
+Line 41, char 3217, byte 3217: byte 2 isn't continuation: 0xF6 0x20, restart at 0x20, substituted 0x3F
+Line 41, char 3219, byte 3219: byte 2 isn't continuation: 0xF7 0x20, restart at 0x20, substituted 0x3F
+Line 46, char 3605, byte 3605: byte 2 isn't continuation: 0xF8 0x20, restart at 0x20, substituted 0x3F
+Line 46, char 3607, byte 3607: byte 2 isn't continuation: 0xF9 0x20, restart at 0x20, substituted 0x3F
+Line 46, char 3609, byte 3609: byte 2 isn't continuation: 0xFA 0x20, restart at 0x20, substituted 0x3F
+Line 46, char 3611, byte 3611: byte 2 isn't continuation: 0xFB 0x20, restart at 0x20, substituted 0x3F
+Line 51, char 4005, byte 4005: byte 2 isn't continuation: 0xFC 0x20, restart at 0x20, substituted 0x3F
+Line 51, char 4007, byte 4007: byte 2 isn't continuation: 0xFD 0x20, restart at 0x20, substituted 0x3F
+Line 59, char 4702, byte 4702: byte 2 isn't continuation: 0xC0 0x22, restart at 0x22, substituted 0x3F
+Line 60, char 4782, byte 4783: byte 3 isn't continuation: 0xE0 0x80 0x22, restart at 0x22, substituted 0x3F
+Line 61, char 4862, byte 4865: byte 4 isn't continuation: 0xF0 0x80 0x80 0x22, restart at 0x22, substituted 0x3F
+Line 62, char 4942, byte 4948: byte 5 isn't continuation: 0xF8 0x80 0x80 0x80 0x22, restart at 0x22, substituted 0x3F
+Line 63, char 5022, byte 5032: byte 6 isn't continuation: 0xFC 0x80 0x80 0x80 0x80 0x22, restart at 0x22, substituted 0x3F
+Line 64, char 5102, byte 5112: byte 2 isn't continuation: 0xDF 0x22, restart at 0x22, substituted 0x3F
+Line 65, char 5182, byte 5193: byte 3 isn't continuation: 0xEF 0xBF 0x22, restart at 0x22, substituted 0x3F
+Line 66, char 5262, byte 5275: byte 4 isn't continuation: 0xF7 0xBF 0xBF 0x22, restart at 0x22, substituted 0x3F
+Line 67, char 5342, byte 5358: byte 5 isn't continuation: 0xFB 0xBF 0xBF 0xBF 0x22, restart at 0x22, substituted 0x3F
+Line 68, char 5422, byte 5442: byte 6 isn't continuation: 0xFD 0xBF 0xBF 0xBF 0xBF 0x22, restart at 0x22, substituted 0x3F
+Line 75, char 5925, byte 5945: byte 2 isn't continuation: 0xC0 0xE0, restart at 0xE0, substituted 0x3F
+Line 75, char 5926, byte 5947: byte 3 isn't continuation: 0xE0 0x80 0xF0, restart at 0xF0, substituted 0x3F
+Line 75, char 5927, byte 5950: byte 4 isn't continuation: 0xF0 0x80 0x80 0xF8, restart at 0xF8, substituted 0x3F
+Line 75, char 5928, byte 5954: byte 5 isn't continuation: 0xF8 0x80 0x80 0x80 0xFC, restart at 0xFC, substituted 0x3F
+Line 75, char 5929, byte 5959: byte 6 isn't continuation: 0xFC 0x80 0x80 0x80 0x80 0xDF, restart at 0xDF, substituted 0x3F
+Line 75, char 5930, byte 5960: byte 2 isn't continuation: 0xDF 0xEF, restart at 0xEF, substituted 0x3F
+Line 75, char 5931, byte 5962: byte 3 isn't continuation: 0xEF 0xBF 0xF7, restart at 0xF7, substituted 0x3F
+Line 75, char 5932, byte 5965: byte 4 isn't continuation: 0xF7 0xBF 0xBF 0xFB, restart at 0xFB, substituted 0x3F
+Line 75, char 5933, byte 5969: byte 5 isn't continuation: 0xFB 0xBF 0xBF 0xBF 0xFD, restart at 0xFD, substituted 0x3F
+Line 75, char 5934, byte 5974: byte 6 isn't continuation: 0xFD 0xBF 0xBF 0xBF 0xBF 0x22, restart at 0x22, substituted 0x3F
+Line 81, char 6414, byte 6454: illegal byte: 0xFE, substituted 0x3F
+Line 82, char 6494, byte 6534: illegal byte: 0xFF, substituted 0x3F
+Line 83, char 6583, byte 6623: illegal byte: 0xFE, substituted 0x3F
+Line 83, char 6584, byte 6624: illegal byte: 0xFE, substituted 0x3F
+Line 83, char 6585, byte 6625: illegal byte: 0xFF, substituted 0x3F
+Line 83, char 6586, byte 6626: illegal byte: 0xFF, substituted 0x3F
