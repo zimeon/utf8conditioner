@@ -1,6 +1,6 @@
 # Makefile for utf8conditioner
 # Simeon Warner - July 2001...
-# [CVS: $Id: Makefile,v 1.10 2005/10/17 21:30:35 simeon Exp $
+# [CVS: $Id: Makefile,v 1.11 2005/10/24 15:40:02 simeon Exp $
 
 OBJ = utf8conditioner.o getopt.o
 EXECUTABLE = utf8conditioner
@@ -72,5 +72,15 @@ test:
 	@echo -n "test[09] - UTF-8-test-5 (bad) ............ "
 	@cat test/UTF-8-test-5.txt | ./$(EXECUTABLE) -c 2> $(TEST_TMP)
 	@r=`diff -I 'Id' $(TEST_TMP) test/test-result-5.txt 2>&1`
+	@if [ -n "$r" ]; then echo "FAIL"; else echo "PASS"; fi
+	@echo -n "test[10] - entities-good (good) .......... "
+	@cat test/entities-good.txt | ./$(EXECUTABLE) -c -x 2> $(TEST_TMP)
+	@if [ -S "$(TEST_TMP)" ]; then echo "FAIL"; else echo "PASS"; fi
+	@echo -n "test[11] - entities-bad not XML (good) ... "
+	@cat test/entities-bad.txt | ./$(EXECUTABLE) -c 2> $(TEST_TMP)
+	@if [ -S "$(TEST_TMP)" ]; then echo "FAIL"; else echo "PASS"; fi
+	@echo -n "test[12] - entities-bad -x (bad) ......... "
+	@cat test/entities-bad.txt | ./$(EXECUTABLE) -c -x 2> $(TEST_TMP)
+	@r=`diff -I 'Id' $(TEST_TMP) test/test-result-entities-bad-x.txt 2>&1`
 	@if [ -n "$r" ]; then echo "FAIL"; else echo "PASS"; fi
 	@rm -f $(TEST_TMP)

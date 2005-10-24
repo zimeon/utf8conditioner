@@ -1,5 +1,5 @@
 /* UTF-8 checker and conditioner
- * Copyright (C) 2001-2003 Simeon Warner - simeon@cs.cornell.edu
+ * Copyright (C) 2001-2005 Simeon Warner - simeon@cs.cornell.edu
  *
  * utf8conditioner is supplied under the GNU Public License and comes 
  * with ABSOLUTELY NO WARRANTY; see COPYING for more details.
@@ -20,40 +20,21 @@
  * valid single byte will be written out, invalid single bytes will be 
  * replaced with a dummy character. The hope is that this will avoid an 
  * error having run-on effects which might interfere with XML markup.
- * (Option -m changes this behaviour to replace with invalid multi-byte
+ * (Option -m changes this behaviour to replace an invalid multi-byte
  * with a single dummy character.)
  *
  * Bugs:
  * - no protection against overflow of byte, character and line counters
  *   (unsigned long int). Will result in incorrect output messages.
  *
- * [CVS: $Id: utf8conditioner.c,v 1.12 2003/12/23 18:24:21 simeon Exp $]
+ * [CVS: $Id: utf8conditioner.c,v 1.13 2005/10/24 15:40:02 simeon Exp $]
  */
 
-#define PROGRAM_NOTICE "\
-utf8conditioner version 23Dec2003. Copyright (C) 2001-2003 Simeon Warner\n\
-\n\
-utf8conditioner is supplied under the GNU Public License and comes\n\
-with ABSOLUTELY NO WARRANTY; run with -L flag for more details.\n\
-utf8conditioner includes software developed by the University of\n\
-California, Berkeley and its contributors. (getopt)\n"
+#define PROGRAM_NOTICE "utf8conditioner version 2005-10. Copyright (C) 2001-2005 Simeon Warner\n\nutf8conditioner is supplied under the GNU Public License and comes\nwith ABSOLUTELY NO WARRANTY; run with -L flag for more details.\nutf8conditioner includes software developed by the University of\nCalifornia, Berkeley and its contributors. (getopt)\n"
 
-#define GNU_GPL_NOTICE1 "\
-This program is free software; you can redistribute it and/or modify\n\
-it under the terms of the GNU General Public License as published by\n\
-the Free Software Foundation; either version 2 of the License, or\n\
-(at your option) any later version.\n\n"
+#define GNU_GPL_NOTICE1 "This program is free software; you can redistribute it and/or modify\nit under the terms of the GNU General Public License as published by\nthe Free Software Foundation; either version 2 of the License, or\n(at your option) any later version.\n\n"
 
-#define GNU_GPL_NOTICE2 "\
-This program is distributed in the hope that it will be useful,\n\
-but WITHOUT ANY WARRANTY; without even the implied warranty of\n\
-MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE. See the\n\
-GNU General Public License for more details.\n\
-\n\
-You should have received a copy of the GNU General Public License\n\
-along with this program (in the file COPYING); if not, visit\n\
-http://www.gnu.org/licenses/gpl.html or write to the Free Software\n\
-Foundation, Inc., 59 Temple Place - Suite 330, Boston, MA 02111 USA\n"
+#define GNU_GPL_NOTICE2 "This program is distributed in the hope that it will be useful,\nbut WITHOUT ANY WARRANTY; without even the implied warranty of\nMERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE. See the\nGNU General Public License for more details.\n\nYou should have received a copy of the GNU General Public License\nalong with this program (in the file COPYING); if not, visit\nhttp://www.gnu.org/licenses/gpl.html or write to the Free Software\nFoundation, Inc., 59 Temple Place - Suite 330, Boston, MA 02111 USA\n"
 
 #include <stdio.h>
 extern int snprintf(char *str, size_t size, const char *format, ...);
@@ -62,20 +43,29 @@ extern int snprintf(char *str, size_t size, const char *format, ...);
 #include "getopt.h" /* for getopt(), could use unistd on Unix */ 
 
 #define MAX_BAD_CHAR 100
+#define MAX_BYTES 10
 
 int validUnicodeChar(unsigned int ch);
 int validXML1_0Char(unsigned int ch);
 int validXML1_1Char(unsigned int ch);
 int validUTF8Char(unsigned int ch);
+unsigned int parseNumericEntity(int b[]);
+int validNonNumericEntity(int b[]);
+char* byteToStr(char* byteStr, int* byte, int n);
+void addMessage(char* msg);
+
+char error[200];                /* place to build error string */
+
 
 int main (int argc, char* argv[]) {
   int j,k;
   int ch;
-  char error[200];                /* place to build error string */
-  char buf[50];                   /* tmp used when building error string */ 
+  char buf[100];                   /* tmp used when building error string */ 
+  char byteStr[MAX_BYTES+1];      /* used to build string for entity ref error messages */
 
-  int byte[10];                   /* bytes of UTF-8 char (must be long enough to hold &#x10FFFF\0 */
+  int byte[MAX_BYTES];            /* bytes of UTF-8 char (must be long enough to hold &#x10FFFF\0 */
   int contBytes;                  /* number of continuation bytes (0-5) */
+  int entityRef;                  /* true if contBytes are an entity ref as opposed to a long UTF8 char */
   unsigned long int bytenum=0;    /* count of bytes read */
   unsigned long int charnum=0;    /* count of characters read */
   unsigned long int linenum=1;    /* count of lines */
@@ -87,10 +77,11 @@ int main (int argc, char* argv[]) {
   int checkOnly=0;                /* check only option */
   int substituteChar = '?';       /* substitute for bad characters */
   int checkXML1_0Chars=0;         /* XML1.0 checks option */
-  int checkXML1_1Chars=0;         /* XML1.1 checks option for Char*/
-  int checkXML1_1Restricted=0;    /* XML1.1 checks option for RestrictedChar*/
+  int checkXML1_1Chars=0;         /* XML1.1 checks option for Char */
+  int checkXML1_1Restricted=0;    /* XML1.1 checks option for RestrictedChar */
   int checkOverlong=1;            /* Check for overlong character encodings */
   int badMultiByteToMultiChar=0;  /* -m option */
+  int checkEntities=0;            /* check entities if any XML checks are on */
 
   int badChar=0;                  /* variables for bad characters option */ 
   unsigned int badChars[MAX_BAD_CHAR];
@@ -115,36 +106,30 @@ int main (int argc, char* argv[]) {
       case '?':
         /* string split to meet ISO C89 requirement of <=509 chars */
         fprintf(stderr, PROGRAM_NOTICE);
-        fprintf(stderr,"\n\
-usage: %s [-q] [-c] [-e num] [[-b char]] [-x] [[-X type]] [-s char] [-h]\n\n\
-Takes UTF-8 input from stdin, writes processed UTF-8 to stdout\n\
-and errors/warnings to stderr.\n\n", argv[0]);
-        fprintf(stderr,"\
-  -c   just check, no output of XML to stdout\n\
-  -q   quiet, don't output messages to stderr\n\
-  -x   XML check (same as '-X 1.0')\n\
-  -X   Specific XML check, valid types are:\n\
-         1.0  check for codes valid in XML1.0 UTF-8 streams
-              (valid codes are: #x9 | #xA | #xD and the ranges\n\
-              [#x20-#xD7FF] | [#xE000-#xFFFD] | [#x10000-#x10FFFF])\n\
-         1.1  check for codes valid in XML1.1 UTF-8 streams\n\
-              (valid codes are: [#x1-#xD7FF] | [#xE000-#xFFFD] |\n\
-              [#x10000-#x10FFFF]), and also make numerical character 
-              reference substitutions for restricted codes
-              (restricted codes are [#x1-#x8] | [#xB-#xC] |\n\
-              [#xE-#x1F] | [#x7F-#x84] | [#x86-#xBF])\n\
-         1.1lax  as 1.1 but do nothing about restricted chars.\n");
-        fprintf(stderr,"\
-  -b   add Unicode character code to list of bad codes\n\
-       (specified as decimal, 0octal or  0xhex),\n\
-       use multiple times at add multiple characters\n\
-  -e   maximum number of error messages to print\n\
-       (default %d, 0 for unlimited)\n\
-  -l   lax - don't check for overlong encodings\n\
-  -m   replace invalid multi-byte sequences with multiple dummy characters\n\
-  -s   change character substituted for bad codes (default '%c')\n\n\
-  -L   display information about license\n\
-  -h   this help\n\n", maxErrors, substituteChar);  
+        fprintf(stderr,"\nusage: %s [-q] [-c] [-e num] [[-b char]] [-x] [[-X type]] [-s char] [-h]\n\n"
+"Takes UTF-8 input from stdin, writes processed UTF-8 to stdout\n"
+"and errors/warnings to stderr.\n\n", argv[0]);
+        fprintf(stderr,"  -c   just check, no output of XML to stdout\n"
+"  -q   quiet, don't output messages to stderr\n"
+"  -x   XML check (same as '-X 1.0')\n"
+"  -X   Specific XML check, valid types are:\n"
+"         1.0  check for codes valid in XML1.0 UTF-8 streams\n"
+"              (valid codes are: #x9 | #xA | #xD and the ranges\n"
+"              [#x20-#xD7FF] | [#xE000-#xFFFD] | [#x10000-#x10FFFF])\n"
+"         1.1  check for codes valid in XML1.1 UTF-8 streams\n"
+"              (valid codes are: [#x1-#xD7FF] | [#xE000-#xFFFD] |\n"
+"              [#x10000-#x10FFFF]), and also make numerical character               reference substitutions for restricted codes              (restricted codes are [#x1-#x8] | [#xB-#xC] |\n"
+"              [#xE-#x1F] | [#x7F-#x84] | [#x86-#xBF])\n"
+"         1.1lax  as 1.1 but do nothing about restricted chars.\n"
+"  -b   add Unicode character code to list of bad codes\n"
+"       (specified as decimal, 0octal or  0xhex),\n"
+"       use multiple times at add multiple characters\n"
+"  -e   maximum number of error messages to print\n"
+"       (default %d, 0 for unlimited)\n"
+"  -l   lax - don't check for overlong encodings\n"
+"  -m   replace invalid multi-byte sequences with multiple dummy characters\n"
+"  -s   change character substituted for bad codes (default '%c')\n\n"
+"  -L   display information about license\n  -h   this help\n\n", maxErrors, substituteChar);  
         exit(1);
       case 'q':
         quiet=1;
@@ -194,6 +179,7 @@ and errors/warnings to stderr.\n\n", argv[0]);
         exit(1);
     }
   }
+  checkEntities=(checkXML1_0Chars || checkXML1_1Chars);
 
   /*
    * Barf if anything on command line left unread (probably an attempt to 
@@ -249,13 +235,13 @@ and errors/warnings to stderr.\n\n", argv[0]);
         if ((ch&0xC0)!=0x80) {
           /* doesn't match 10xxxxxx */
 	  snprintf(buf,sizeof(buf),"byte %d isn't continuation:",(j+1));
-          strncat(error, buf, sizeof(error));
+          addMessage(buf);
           for (k=0; k<=j; k++) {
             snprintf(buf,sizeof(buf)," 0x%02X", byte[k]);
-            strncat(error, buf, sizeof(error));
+            addMessage(buf);
           }
-	  snprintf(buf,sizeof(buf),", restart at 0x%02X",ch);
-          strncat(error, buf, sizeof(error));
+	  snprintf(buf,sizeof(buf),"restart at 0x%02X",ch);
+          addMessage(buf);
 	  ungetc(ch,stdin);
 	  bytenum--;
 	  break;
@@ -263,7 +249,7 @@ and errors/warnings to stderr.\n\n", argv[0]);
         unicode = (unicode << 6) + (ch&0x3F);
       } else {
         snprintf(buf,sizeof(buf),"premature EOF at byte %ld, should be byte %d of code", bytenum, j);
-        strncat(error,buf,sizeof(error));
+        addMessage(buf);
         break;
       }
     }
@@ -272,13 +258,57 @@ and errors/warnings to stderr.\n\n", argv[0]);
     if ((error[0]=='\0') && checkOverlong && contBytes>0 
                          && (unicode<=highestCharInNBytes[contBytes-1])) {
       snprintf(buf,sizeof(buf),"illegal overlong encoding of 0x%04X",unicode);
-      strncat(error,buf,sizeof(error));
+      addMessage(buf);
     }
  
+    /* Attempt to read numeric character reference or XML entity if we have an ampersand (&)
+     * start character, e.g. &#123; for decimal, &#xABC; for hex 
+     */
+    entityRef=0;
+    if (checkEntities && (byte[0]=='&')) {
+      for (j=1; (j<MAX_BYTES && byte[j-1]!=';'); j++) {
+        if ((ch=getc(stdin))==EOF) {
+          byte[j]=';';
+	  snprintf(buf,sizeof(buf),"EOF in entity reference, terminated to read %s",byteToStr(byteStr,byte,j));
+	  addMessage(buf);
+        } else if (ch<32) {
+          /*FIXME: should putback(stdin, ch);*/
+          byte[j]=';';
+	  snprintf(buf,sizeof(buf),"character<32 in entity reference, terminated to read %s",byteToStr(byteStr,byte,j));
+	  addMessage(buf);
+	} else {
+          bytenum++;
+          if ((ch<'0' || ch>'9') && (ch<'a' || ch>'z') && (ch<'A' || ch>'Z') && ch!='#' && ch!=';') {  
+            /* FIXME - what are the allowed characters in and entity ref? [Simeon/2005-10-21] */
+   	    snprintf(buf,sizeof(buf),"bad character in entity reference, got 0x%02X, substituted ?",ch);
+	    addMessage(buf);
+            ch='?';
+          }
+          byte[j]=ch;
+        }
+      }
+      contBytes=(j-1);
+      if (byte[contBytes]==';') {
+        if (byte[1]=='#') {
+          if ((unicode=parseNumericEntity(byte))==0) {
+            snprintf(buf,sizeof(buf),"bad numeric entity reference: %s",byteToStr(byteStr,byte,contBytes));
+ 	    addMessage(buf);
+          }
+	} else if (!validNonNumericEntity(byte)) {
+          snprintf(buf,sizeof(buf),"illegal non-numeric entity reference: %s",byteToStr(byteStr,byte,contBytes));
+	  addMessage(buf);
+        }
+      } else {
+	snprintf(buf,sizeof(buf),"entity reference too long or not terminated, adding ;? FIXME - WHAT IS MAX LENGTH?");
+	addMessage(buf);
+        byte[++contBytes]=';';
+      }
+    }
+
     /* check for illegal Unicode chars */
     if ((error[0]=='\0') && !validUTF8Char(unicode)) {
       snprintf(buf,sizeof(buf),"illegal UTF-8 code: 0x%04X",unicode);
-      strncat(error,buf,sizeof(error));
+      addMessage(buf);
     }
 
     if (error[0]=='\0') {
@@ -308,19 +338,19 @@ and errors/warnings to stderr.\n\n", argv[0]);
             byte[k]=substituteChar;
           }
         }
-	snprintf(buf,sizeof(buf),", substituted ");
-        strncat(error, buf, sizeof(error));
+	snprintf(buf,sizeof(buf),"substituted ");
+        addMessage(buf);
         for (k=0; k<=(j-1); k++) {
           snprintf(buf,sizeof(buf)," 0x%02X", byte[k]);
-          strncat(error, buf, sizeof(error));
+          addMessage(buf);
         }
       } else {
-        /* substitute one char for all bytes of bad multibyte char
+        /* substitute one char for all bytes of bad multibyte char or entity reference
          */
         byte[0]=substituteChar;
         j=1;
-	snprintf(buf,sizeof(buf),", substituted 0x%02X", byte[0]);
-        strncat(error, buf, sizeof(error));
+	snprintf(buf,sizeof(buf),"substituted 0x%02X", byte[0]);
+        addMessage(buf);
       }
     } else { 
       /* Finally check for restricted chars that we do a NCR substitution for */
@@ -427,5 +457,77 @@ int restrictedXML1_1Char(unsigned int ch) {
          (ch>=0x86 && ch<=0xBF));
 } 
 
+/*
+ * Expects b[] to start &# and to be terminated with '\0'
+ *
+ * Returns: unicode code point on success
+ *          0                  on failure 
+ *
+ * FIXME is char 0 an allowed entity value? Should something 
+ * else be used to return for error [Simeon/2005-10-21]
+ */
+unsigned int parseNumericEntity(int b[]) {
+  int j;
+  unsigned int unicode=0;
+  if (b[2]=='x') {
+    /* hex */
+    for (j=3; b[j]!=';'; j++) {
+      unicode*=16;
+      if (b[j]>='0' && b[j]<='9') {
+        unicode+=b[j]-'0';
+      } else if (b[j]>='a' && b[j]<='f') {
+        unicode+=b[j]-'a'+10;
+      } else if (b[j]>='A' && b[j]<='F') {
+        unicode+=b[j]-'A'+10;
+      } else {
+        return(0);
+      } 
+    }
+  } else {
+    /* decimal */
+    for (j=2; b[j]!=';'; j++) {
+      unicode*=10;
+      if (b[j]>='0' && b[j]<='9') {
+        unicode+=b[j]-'0';
+      } else {
+        return(0);
+      } 
+    }
+  }
+  return(unicode);
+}
+
+/*
+ * Returns true is the entity passed in is one a of the few valid non-numericl
+ * entities allowed in XML:
+ *   &amp; &apos; &quot; &gt; &lt;
+ * false otherwise 
+ */
+int validNonNumericEntity(int b[]) {
+  return( (b[1]=='a' && b[2]=='m' && b[3]=='p' && b[4]==';') ||
+          (b[1]=='a' && b[2]=='p' && b[3]=='o' && b[4]=='s' && b[5]==';') ||
+          (b[1]=='q' && b[2]=='u' && b[3]=='o' && b[4]=='t' && b[5]==';') ||
+          (b[1]=='g' && b[2]=='t' && b[3]==';') ||
+          (b[1]=='l' && b[2]=='t' && b[3]==';') );
+}
+
+char* byteToStr(char* byteStr, int* byte, int n) {
+  int j;
+  for (j=0; j<=n; j++) {
+    byteStr[j]=(char)byte[j];
+  }
+  byteStr[j]='\0';
+  return(byteStr);
+}
+
+/*
+ * Add message to error string, uses global 'error' to accumulate errors string
+ */
+void addMessage(char* msg) {
+  if (strlen(error)>0 && msg[0]!=' ') {
+    strncat(error, ", ", sizeof(error));
+  }
+  strncat(error, msg, sizeof(error));
+}
 
 /***end***/

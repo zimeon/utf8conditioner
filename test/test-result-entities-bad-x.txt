@@ -1,0 +1,10 @@
+Line 1, char 15, byte 18: bad numeric entity reference: &#0;, substituted 0x3F
+Line 2, char 37, byte 44: bad numeric entity reference: &#00;, substituted 0x3F
+Line 3, char 49, byte 58: bad numeric entity reference: &#;, substituted 0x3F
+Line 4, char 60, byte 78: entity reference too long or not terminated, adding ;? FIXME - WHAT IS MAX LENGTH?, substituted 0x3F
+Line 5, char 87, byte 110: code not allowed in XML1.0: 0x000B, substituted 0x3F
+Line 6, char 115, byte 141: character<32 in entity reference, terminated to read &sss;, illegal non-numeric entity reference: &sss;, substituted 0x3F
+Line 6, char 147, byte 180: illegal non-numeric entity reference: &ntilde;, substituted 0x3F
+Line 7, char 180, byte 218: illegal non-numeric entity reference: &uuml;, substituted 0x3F
+Line 8, char 213, byte 256: illegal non-numeric entity reference: &copy;, substituted 0x3F
+Line 9, char 241, byte 287: character<32 in entity reference, terminated to read &sss;, illegal non-numeric entity reference: &sss;, substituted 0x3F

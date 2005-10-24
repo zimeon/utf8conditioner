@@ -1,0 +1,10 @@
+code for zero &#0; 
+long code for zero &#00;
+too short &#;
+too long &#1234567890;
+code for illegal char &#x0B;
+not terminated before EOL &sss
+illegal non-numeric entity ref &ntilde;
+illegal non-numeric entity ref &uuml;
+illegal non-numeric entity ref &copy;
+not terminated before EOF &sss
