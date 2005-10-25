@@ -13,6 +13,12 @@
 &#xabc;
 &#xabcd;
 &#xabcde;
+&#xA;
+&#xAB;
+&#xABC;
+&#xABCD;
+&#xABCDE;
+&#xAb123;
 &quot;
 &amp;
 &lt;

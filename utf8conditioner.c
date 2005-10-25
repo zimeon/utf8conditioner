@@ -27,7 +27,7 @@
  * - no protection against overflow of byte, character and line counters
  *   (unsigned long int). Will result in incorrect output messages.
  *
- * [CVS: $Id: utf8conditioner.c,v 1.14 2005/10/25 04:19:20 simeon Exp $]
+ * [CVS: $Id: utf8conditioner.c,v 1.15 2005/10/25 23:18:23 simeon Exp $]
  */
 
 #define PROGRAM_NOTICE "utf8conditioner version 2005-10. Copyright (C) 2001-2005 Simeon Warner\n\nutf8conditioner is supplied under the GNU Public License and comes\nwith ABSOLUTELY NO WARRANTY; run with -L flag for more details.\nutf8conditioner includes software developed by the University of\nCalifornia, Berkeley and its contributors. (getopt)\n"
@@ -54,13 +54,13 @@ int validXMLEntity(int b[]);
 char* byteToStr(char* byteStr, int* byte, int n);
 void addMessage(char* msg);
 
-char error[200];                /* place to build error string */
+char error[200];                  /* global place to build error string */
 
 
 int main (int argc, char* argv[]) {
   int j,k;
   int ch;
-  char buf[100];                   /* tmp used when building error string */ 
+  char buf[100];                  /* tmp used when building error string */ 
   char byteStr[MAX_BYTES+1];      /* used to build string for entity ref error messages */
 
   int byte[MAX_BYTES];            /* bytes of UTF-8 char (must be long enough to hold &#x10FFFF\0 */
@@ -263,21 +263,23 @@ int main (int argc, char* argv[]) {
       addMessage(buf);
     }
  
-    /* Attempt to read numeric character reference or entity reference if we have an ampersand (&)
-     * start character, e.g. &#123; for decimal, &#xABC; for hex 
+    /* Attempt to read numeric character reference or entity reference if we 
+     * have an ampersand (&) start character, e.g. &#123; for decimal, 
+     * &#xABC; for hex 
      *
      * http://www.w3.org/TR/2000/WD-xml-2e-20000814#dt-charref
      *
-     * [66]    CharRef   ::=    '&#' [0-9]+ ';'
-     *                        | '&#x' [0-9a-fA-F]+ ';'[WFC: Legal Character]
+     * [66] CharRef ::= '&#' [0-9]+ ';' | '&#x' [0-9a-fA-F]+ ';'
      * 
      * Well-formedness constraint: Legal Character
      * 
-     * Characters referred to using character references must match the production for Char.
+     * Characters referred to using character references must match 
+     * the production for Char.
      *
-     * If the character reference begins with "&#x ", the digits and letters up to the terminating ; 
-     * provide a hexadecimal representation of the character's code point in ISO/IEC 10646. If it 
-     * begins just with "&#", the digits up to the terminating ; provide a decimal representation 
+     * If the character reference begins with "&#x ", the digits and letters 
+     * up to the terminating ; provide a hexadecimal representation of the 
+     * character's code point in ISO/IEC 10646. If it begins just with "&#", 
+     * the digits up to the terminating ; provide a decimal representation 
      * of the character's code point.
      */
     entityRef=0;
@@ -325,8 +327,9 @@ int main (int argc, char* argv[]) {
          *  [5]      Name   ::=    (Letter | '_' | ':') ( NameChar)*
          *  [4]  NameChar   ::=    Letter | Digit  | '.' | '-' | '_' | ':' | CombiningChar | Extender
          * ...
-         * However, here we add a local constraint of maximum length MAX_BYTES which is more than
-         * sufficient to allow numeric character references and the 5 XML entities [Simeon/2005-10-25]
+         * However, here we add a local constraint of maximum length 
+         * MAX_BYTES which is more than sufficient to allow numeric character 
+         * references and the 5 XML entities [Simeon/2005-10-25]
          */
 	snprintf(buf,sizeof(buf),"entity reference too long (local constraint) or not terminated, adding ;");
 	addMessage(buf);
@@ -354,7 +357,6 @@ int main (int argc, char* argv[]) {
         }
       } 
     }
-  
 
     if (error[0]!='\0') {
       numErrors++;
@@ -454,6 +456,7 @@ int validXML1_0Char(unsigned int ch) {
          (ch>=0x10000 && ch<=0x10FFFF)); 
 } 
 
+
 /* From http://www.w3.org/TR/xml11/#charsets
  * (sec 2.2, extracted 23Dec2003)
  * 
@@ -486,14 +489,17 @@ int restrictedXML1_1Char(unsigned int ch) {
          (ch>=0x86 && ch<=0xBF));
 } 
 
-/*
- * Expects b[] to start &# and to be terminated with '\0'
+
+/* Parse a numeric character reference in either decimal or hex
+ * notation. Expects b[] to start with codes for &# and to be 
+ * terminated with ;
  *
  * Returns: unicode code point on success
  *          0                  on failure 
  *
- * Note that #x0 is not a valid XML Char and so can safely be used as the 
- * failure return value. See http://www.w3.org/TR/2000/WD-xml-2e-20000814#sec-references
+ * Note that #x0 is not a valid XML Char and so can safely be used 
+ * as the failure return value. 
+ * See http://www.w3.org/TR/2000/WD-xml-2e-20000814#sec-references
  */
 unsigned int parseNumericCharacterReference(int b[]) {
   int j;
@@ -526,18 +532,19 @@ unsigned int parseNumericCharacterReference(int b[]) {
   return(unicode);
 }
 
-/*
- * Returns true is the entity passed in is one a of the few valid non-numericl
- * entities allowed in XML:
+
+/* Returns true if the entity passed in is one of the 5 pre-defined
+ * valid non-numerical entities allowed in XML:
  *   &amp; &apos; &quot; &gt; &lt;
- * false otherwise 
+ * Returns false otherwise 
  */
 int validXMLEntity(int b[]) {
-  return( (b[1]=='a' && b[2]=='m' && b[3]=='p' && b[4]==';') ||
-          (b[1]=='a' && b[2]=='p' && b[3]=='o' && b[4]=='s' && b[5]==';') ||
-          (b[1]=='q' && b[2]=='u' && b[3]=='o' && b[4]=='t' && b[5]==';') ||
-          (b[1]=='g' && b[2]=='t' && b[3]==';') ||
-          (b[1]=='l' && b[2]=='t' && b[3]==';') );
+  return( b[0]=='&' &&
+          ( (b[1]=='a' && b[2]=='m' && b[3]=='p' && b[4]==';') ||
+            (b[1]=='a' && b[2]=='p' && b[3]=='o' && b[4]=='s' && b[5]==';') ||
+            (b[1]=='q' && b[2]=='u' && b[3]=='o' && b[4]=='t' && b[5]==';') ||
+            (b[1]=='g' && b[2]=='t' && b[3]==';') ||
+            (b[1]=='l' && b[2]=='t' && b[3]==';') ) );
 }
 
 char* byteToStr(char* byteStr, int* byte, int n) {

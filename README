@@ -21,11 +21,14 @@ with on other systems with an ANSI C compiler.
 
 On Linux with gcc:
 
-> make
+> make	                        [should build utf8conditioner]
+
+> make test                     [will run several tests, should all say PASS]
+
 > ./utf8conditioner -h    	[will display help]
 
 To use another compiler, change the CC = gcc line in the Makefile.
 
 
 Simeon Warner, simeon@cs.cornell.edu
-$Id: README,v 1.1 2003/01/14 19:31:09 simeon Exp $
+$Id: README,v 1.2 2005/10/25 23:18:23 simeon Exp $
