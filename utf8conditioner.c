@@ -27,7 +27,7 @@
  * - no protection against overflow of byte, character and line counters
  *   (unsigned long int). Will result in incorrect output messages.
  *
- * [CVS: $Id: utf8conditioner.c,v 1.13 2005/10/24 15:40:02 simeon Exp $]
+ * [CVS: $Id: utf8conditioner.c,v 1.14 2005/10/25 04:19:20 simeon Exp $]
  */
 
 #define PROGRAM_NOTICE "utf8conditioner version 2005-10. Copyright (C) 2001-2005 Simeon Warner\n\nutf8conditioner is supplied under the GNU Public License and comes\nwith ABSOLUTELY NO WARRANTY; run with -L flag for more details.\nutf8conditioner includes software developed by the University of\nCalifornia, Berkeley and its contributors. (getopt)\n"
@@ -49,8 +49,8 @@ int validUnicodeChar(unsigned int ch);
 int validXML1_0Char(unsigned int ch);
 int validXML1_1Char(unsigned int ch);
 int validUTF8Char(unsigned int ch);
-unsigned int parseNumericEntity(int b[]);
-int validNonNumericEntity(int b[]);
+unsigned int parseNumericCharacterReference(int b[]);
+int validXMLEntity(int b[]);
 char* byteToStr(char* byteStr, int* byte, int n);
 void addMessage(char* msg);
 
@@ -118,7 +118,9 @@ int main (int argc, char* argv[]) {
 "              [#x20-#xD7FF] | [#xE000-#xFFFD] | [#x10000-#x10FFFF])\n"
 "         1.1  check for codes valid in XML1.1 UTF-8 streams\n"
 "              (valid codes are: [#x1-#xD7FF] | [#xE000-#xFFFD] |\n"
-"              [#x10000-#x10FFFF]), and also make numerical character               reference substitutions for restricted codes              (restricted codes are [#x1-#x8] | [#xB-#xC] |\n"
+"              [#x10000-#x10FFFF]), and also make numerical character\n"
+"              reference substitutions for restricted codes\n"
+"              (restricted codes are [#x1-#x8] | [#xB-#xC] |\n"
 "              [#xE-#x1F] | [#x7F-#x84] | [#x86-#xBF])\n"
 "         1.1lax  as 1.1 but do nothing about restricted chars.\n"
 "  -b   add Unicode character code to list of bad codes\n"
@@ -261,8 +263,22 @@ int main (int argc, char* argv[]) {
       addMessage(buf);
     }
  
-    /* Attempt to read numeric character reference or XML entity if we have an ampersand (&)
+    /* Attempt to read numeric character reference or entity reference if we have an ampersand (&)
      * start character, e.g. &#123; for decimal, &#xABC; for hex 
+     *
+     * http://www.w3.org/TR/2000/WD-xml-2e-20000814#dt-charref
+     *
+     * [66]    CharRef   ::=    '&#' [0-9]+ ';'
+     *                        | '&#x' [0-9a-fA-F]+ ';'[WFC: Legal Character]
+     * 
+     * Well-formedness constraint: Legal Character
+     * 
+     * Characters referred to using character references must match the production for Char.
+     *
+     * If the character reference begins with "&#x ", the digits and letters up to the terminating ; 
+     * provide a hexadecimal representation of the character's code point in ISO/IEC 10646. If it 
+     * begins just with "&#", the digits up to the terminating ; provide a decimal representation 
+     * of the character's code point.
      */
     entityRef=0;
     if (checkEntities && (byte[0]=='&')) {
@@ -272,14 +288,18 @@ int main (int argc, char* argv[]) {
 	  snprintf(buf,sizeof(buf),"EOF in entity reference, terminated to read %s",byteToStr(byteStr,byte,j));
 	  addMessage(buf);
         } else if (ch<32) {
-          /*FIXME: should putback(stdin, ch);*/
+          ungetc(ch,stdin);
           byte[j]=';';
 	  snprintf(buf,sizeof(buf),"character<32 in entity reference, terminated to read %s",byteToStr(byteStr,byte,j));
 	  addMessage(buf);
 	} else {
           bytenum++;
           if ((ch<'0' || ch>'9') && (ch<'a' || ch>'z') && (ch<'A' || ch>'Z') && ch!='#' && ch!=';') {  
-            /* FIXME - what are the allowed characters in and entity ref? [Simeon/2005-10-21] */
+            /* FIXME - There are a vast number of characters allowed in a general XML entity
+             * FIXME - reference (see http://www.w3.org/TR/2000/WD-xml-2e-20000814#NT-EntityRef).
+             * FIXME - Here I allow a reduced set of characters sufficient to allow parsing of 
+             * FIXME - numeric character references and the 5 XML entities [Simeon/2005-10-25]
+             */
    	    snprintf(buf,sizeof(buf),"bad character in entity reference, got 0x%02X, substituted ?",ch);
 	    addMessage(buf);
             ch='?';
@@ -290,16 +310,25 @@ int main (int argc, char* argv[]) {
       contBytes=(j-1);
       if (byte[contBytes]==';') {
         if (byte[1]=='#') {
-          if ((unicode=parseNumericEntity(byte))==0) {
-            snprintf(buf,sizeof(buf),"bad numeric entity reference: %s",byteToStr(byteStr,byte,contBytes));
+          if ((unicode=parseNumericCharacterReference(byte))==0) {
+            snprintf(buf,sizeof(buf),"bad numeric character reference: %s",byteToStr(byteStr,byte,contBytes));
  	    addMessage(buf);
           }
-	} else if (!validNonNumericEntity(byte)) {
-          snprintf(buf,sizeof(buf),"illegal non-numeric entity reference: %s",byteToStr(byteStr,byte,contBytes));
+	} else if (!validXMLEntity(byte)) {
+          snprintf(buf,sizeof(buf),"illegal XML  entity reference: %s",byteToStr(byteStr,byte,contBytes));
 	  addMessage(buf);
         }
       } else {
-	snprintf(buf,sizeof(buf),"entity reference too long or not terminated, adding ;? FIXME - WHAT IS MAX LENGTH?");
+        /* There is no limit on the length of an entity, it is defined via:
+         * http://www.w3.org/TR/2000/WD-xml-2e-20000814#NT-EntityRef
+         * [68] EntityRef   ::=    '&' Name ';'
+         *  [5]      Name   ::=    (Letter | '_' | ':') ( NameChar)*
+         *  [4]  NameChar   ::=    Letter | Digit  | '.' | '-' | '_' | ':' | CombiningChar | Extender
+         * ...
+         * However, here we add a local constraint of maximum length MAX_BYTES which is more than
+         * sufficient to allow numeric character references and the 5 XML entities [Simeon/2005-10-25]
+         */
+	snprintf(buf,sizeof(buf),"entity reference too long (local constraint) or not terminated, adding ;");
 	addMessage(buf);
         byte[++contBytes]=';';
       }
@@ -463,10 +492,10 @@ int restrictedXML1_1Char(unsigned int ch) {
  * Returns: unicode code point on success
  *          0                  on failure 
  *
- * FIXME is char 0 an allowed entity value? Should something 
- * else be used to return for error [Simeon/2005-10-21]
+ * Note that #x0 is not a valid XML Char and so can safely be used as the 
+ * failure return value. See http://www.w3.org/TR/2000/WD-xml-2e-20000814#sec-references
  */
-unsigned int parseNumericEntity(int b[]) {
+unsigned int parseNumericCharacterReference(int b[]) {
   int j;
   unsigned int unicode=0;
   if (b[2]=='x') {
@@ -503,7 +532,7 @@ unsigned int parseNumericEntity(int b[]) {
  *   &amp; &apos; &quot; &gt; &lt;
  * false otherwise 
  */
-int validNonNumericEntity(int b[]) {
+int validXMLEntity(int b[]) {
   return( (b[1]=='a' && b[2]=='m' && b[3]=='p' && b[4]==';') ||
           (b[1]=='a' && b[2]=='p' && b[3]=='o' && b[4]=='s' && b[5]==';') ||
           (b[1]=='q' && b[2]=='u' && b[3]=='o' && b[4]=='t' && b[5]==';') ||
