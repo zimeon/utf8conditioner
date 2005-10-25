@@ -1,6 +1,6 @@
 # Makefile for utf8conditioner
 # Simeon Warner - July 2001...
-# [CVS: $Id: Makefile,v 1.11 2005/10/24 15:40:02 simeon Exp $
+# [CVS: $Id: Makefile,v 1.12 2005/10/25 23:27:09 simeon Exp $
 
 OBJ = utf8conditioner.o getopt.o
 EXECUTABLE = utf8conditioner
@@ -34,7 +34,7 @@ tar:
 
 .PHONY: zip
 zip:
-	cd ..;zip /tmp/utf8conditioner.zip $(PACKAGE); cd utf8  
+	cd ..;zip -r /tmp/utf8conditioner.zip $(PACKAGE); cd utf8  
 	ls -l /tmp/utf8conditioner.zip
 
 .PHONY: test
