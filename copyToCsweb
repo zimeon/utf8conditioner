@@ -2,6 +2,7 @@
 #
 set dst=$HOME/pub/csweb/software/utf8conditioner
 
+make clean
 echo "Copying to $dst..."
 rsync --exclude=CVS --exclude="*~" --exclude=copyToCsweb --delete -rav ./ $dst/
 
