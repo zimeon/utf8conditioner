@@ -27,7 +27,7 @@
  * - no protection against overflow of byte, character and line counters
  *   (unsigned long int). Will result in incorrect output messages.
  *
- * [CVS: $Id: utf8conditioner.c,v 1.15 2005/10/25 23:18:23 simeon Exp $]
+ * [CVS: $Id: utf8conditioner.c,v 1.16 2015/01/07 15:02:10 sw272 Exp $]
  */
 
 #define PROGRAM_NOTICE "utf8conditioner version 2005-10. Copyright (C) 2001-2005 Simeon Warner\n\nutf8conditioner is supplied under the GNU Public License and comes\nwith ABSOLUTELY NO WARRANTY; run with -L flag for more details.\nutf8conditioner includes software developed by the University of\nCalifornia, Berkeley and its contributors. (getopt)\n"
@@ -37,7 +37,7 @@
 #define GNU_GPL_NOTICE2 "This program is distributed in the hope that it will be useful,\nbut WITHOUT ANY WARRANTY; without even the implied warranty of\nMERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE. See the\nGNU General Public License for more details.\n\nYou should have received a copy of the GNU General Public License\nalong with this program (in the file COPYING); if not, visit\nhttp://www.gnu.org/licenses/gpl.html or write to the Free Software\nFoundation, Inc., 59 Temple Place - Suite 330, Boston, MA 02111 USA\n"
 
 #include <stdio.h>
-extern int snprintf(char *str, size_t size, const char *format, ...);
+//extern int snprintf(char *str, size_t size, const char *format, ...);
 #include <string.h>
 #include <stdlib.h> /* for strtoul() */
 #include "getopt.h" /* for getopt(), could use unistd on Unix */ 
