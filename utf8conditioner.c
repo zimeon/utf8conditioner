@@ -48,6 +48,7 @@
 int validUnicodeChar(unsigned int ch);
 int validXML1_0Char(unsigned int ch);
 int validXML1_1Char(unsigned int ch);
+int restrictedXML1_1Char(unsigned int ch);
 int validUTF8Char(unsigned int ch);
 unsigned int parseNumericCharacterReference(int b[]);
 int validXMLEntity(int b[]);
