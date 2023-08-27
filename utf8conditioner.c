@@ -86,10 +86,11 @@ int main (int argc, char* argv[]) {
 
   int badChar=0;                  /* variables for bad characters option */
   unsigned int badChars[MAX_BAD_CHAR];
-  int highestCharInNBytes[6];
+  unsigned int highestCharInNBytes[6];
 
   badChars[badChar] = 0;          /* terminator */
 
+  /* all values are positive as MSB isn't set */
   highestCharInNBytes[0]=0x7F;
   highestCharInNBytes[1]=0x7FF;
   highestCharInNBytes[2]=0xFFFF;
@@ -259,7 +260,7 @@ int main (int argc, char* argv[]) {
 
     /* check for overlong encodings if no error already */
     if ((error[0]=='\0') && checkOverlong && contBytes>0
-                         && (unicode<=highestCharInNBytes[contBytes-1])) {
+                         && (unicode <= highestCharInNBytes[contBytes-1])) {
       snprintf(buf,sizeof(buf),"illegal overlong encoding of 0x%04X",unicode);
       addMessage(buf);
     }
