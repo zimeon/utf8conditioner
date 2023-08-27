@@ -66,7 +66,7 @@ int main (int argc, char* argv[]) {
 
   int byte[MAX_BYTES];            /* bytes of UTF-8 char (must be long enough to hold &#x10FFFF\0 */
   int contBytes;                  /* number of continuation bytes (0-5) */
-  int entityRef;                  /* true if contBytes are an entity ref as opposed to a long UTF8 char */
+  //int entityRef;                  /* true if contBytes are an entity ref as opposed to a long UTF8 char */
   unsigned long int bytenum=0;    /* count of bytes read */
   unsigned long int charnum=0;    /* count of characters read */
   unsigned long int linenum=1;    /* count of lines */
@@ -284,7 +284,7 @@ int main (int argc, char* argv[]) {
      * the digits up to the terminating ; provide a decimal representation
      * of the character's code point.
      */
-    entityRef=0;
+    //entityRef=0;
     if (checkEntities && (byte[0]=='&')) {
       for (j=1; (j<MAX_BYTES && byte[j-1]!=';'); j++) {
         if ((ch=getc(stdin))==EOF) {
