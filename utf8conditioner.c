@@ -562,9 +562,9 @@ char* byteToStr(char* byteStr, int* byte, int n) {
  */
 void addMessage(char* msg) {
   if (strlen(error)>0 && msg[0]!=' ') {
-    strncat(error, ", ", sizeof(error));
+    strncat(error, ", ", sizeof(error) - 1);
   }
-  strncat(error, msg, sizeof(error));
+  strncat(error, msg, sizeof(error) - 1);
 }
 
 /***end***/
