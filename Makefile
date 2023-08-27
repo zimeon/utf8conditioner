@@ -8,7 +8,7 @@ PACKAGE = utf8/utf8conditioner.c utf8/getopt.c utf8/getopt.h utf8/Makefile utf8/
 TEST_TMP = /tmp/utf8conditioner_test
 
 CC = gcc
-LIBS = 
+LIBS =
 CFLAGS =
 
 all utf8conditioner: $(OBJ)
@@ -34,7 +34,7 @@ tar:
 
 .PHONY: zip
 zip:
-	cd ..;zip -r /tmp/utf8conditioner.zip $(PACKAGE); cd utf8  
+	cd ..;zip -r /tmp/utf8conditioner.zip $(PACKAGE); cd utf8
 	ls -l /tmp/utf8conditioner.zip
 
 .PHONY: test
