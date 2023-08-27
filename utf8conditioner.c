@@ -57,7 +57,6 @@ void addMessage(char* msg);
 
 char error[200];                  /* global place to build error string */
 
-
 int main (int argc, char* argv[]) {
   int j,k;
   int ch;
@@ -103,84 +102,84 @@ int main (int argc, char* argv[]) {
    */
   while ((j=getopt(argc,argv,"hH?qce:b:s:xX:mlL"))!=EOF) {
     switch (j) {
-      case 'h':
-      case 'H':
-      case '?':
-        /* string split to meet ISO C89 requirement of <=509 chars */
-        fprintf(stderr, PROGRAM_NOTICE);
-        fprintf(stderr,"\nusage: %s [-q] [-c] [-e num] [[-b char]] [-x] [[-X type]] [-s char] [-h]\n\n"
-"Takes UTF-8 input from stdin, writes processed UTF-8 to stdout\n"
-"and errors/warnings to stderr.\n\n", argv[0]);
-        fprintf(stderr,"  -c   just check, no output of XML to stdout\n"
-"  -q   quiet, don't output messages to stderr\n"
-"  -x   XML check (same as '-X 1.0')\n"
-"  -X   Specific XML check, valid types are:\n"
-"         1.0  check for codes valid in XML1.0 UTF-8 streams\n"
-"              (valid codes are: #x9 | #xA | #xD and the ranges\n"
-"              [#x20-#xD7FF] | [#xE000-#xFFFD] | [#x10000-#x10FFFF])\n"
-"         1.1  check for codes valid in XML1.1 UTF-8 streams\n"
-"              (valid codes are: [#x1-#xD7FF] | [#xE000-#xFFFD] |\n"
-"              [#x10000-#x10FFFF]), and also make numerical character\n"
-"              reference substitutions for restricted codes\n"
-"              (restricted codes are [#x1-#x8] | [#xB-#xC] |\n"
-"              [#xE-#x1F] | [#x7F-#x84] | [#x86-#xBF])\n"
-"         1.1lax  as 1.1 but do nothing about restricted chars.\n"
-"  -b   add Unicode character code to list of bad codes\n"
-"       (specified as decimal, 0octal or  0xhex),\n"
-"       use multiple times at add multiple characters\n"
-"  -e   maximum number of error messages to print\n"
-"       (default %d, 0 for unlimited)\n"
-"  -l   lax - don't check for overlong encodings\n"
-"  -m   replace invalid multi-byte sequences with multiple dummy characters\n"
-"  -s   change character substituted for bad codes (default '%c')\n\n"
-"  -L   display information about license\n  -h   this help\n\n", maxErrors, substituteChar);
+    case 'h':
+    case 'H':
+    case '?':
+      /* string split to meet ISO C89 requirement of <=509 chars */
+      fprintf(stderr, PROGRAM_NOTICE);
+      fprintf(stderr,"\nusage: %s [-q] [-c] [-e num] [[-b char]] [-x] [[-X type]] [-s char] [-h]\n\n"
+              "Takes UTF-8 input from stdin, writes processed UTF-8 to stdout\n"
+              "and errors/warnings to stderr.\n\n", argv[0]);
+      fprintf(stderr,"  -c   just check, no output of XML to stdout\n"
+              "  -q   quiet, don't output messages to stderr\n"
+              "  -x   XML check (same as '-X 1.0')\n"
+              "  -X   Specific XML check, valid types are:\n"
+              "         1.0  check for codes valid in XML1.0 UTF-8 streams\n"
+              "              (valid codes are: #x9 | #xA | #xD and the ranges\n"
+              "              [#x20-#xD7FF] | [#xE000-#xFFFD] | [#x10000-#x10FFFF])\n"
+              "         1.1  check for codes valid in XML1.1 UTF-8 streams\n"
+              "              (valid codes are: [#x1-#xD7FF] | [#xE000-#xFFFD] |\n"
+              "              [#x10000-#x10FFFF]), and also make numerical character\n"
+              "              reference substitutions for restricted codes\n"
+              "              (restricted codes are [#x1-#x8] | [#xB-#xC] |\n"
+              "              [#xE-#x1F] | [#x7F-#x84] | [#x86-#xBF])\n"
+              "         1.1lax  as 1.1 but do nothing about restricted chars.\n"
+              "  -b   add Unicode character code to list of bad codes\n"
+              "       (specified as decimal, 0octal or  0xhex),\n"
+              "       use multiple times at add multiple characters\n"
+              "  -e   maximum number of error messages to print\n"
+              "       (default %d, 0 for unlimited)\n"
+              "  -l   lax - don't check for overlong encodings\n"
+              "  -m   replace invalid multi-byte sequences with multiple dummy characters\n"
+              "  -s   change character substituted for bad codes (default '%c')\n\n"
+              "  -L   display information about license\n  -h   this help\n\n", maxErrors, substituteChar);
+      exit(1);
+    case 'q':
+      quiet=1;
+      break;
+    case 'c':
+      checkOnly=1;
+      break;
+    case 'b':
+      if (badChar>=(MAX_BAD_CHAR-1)) {
+        fprintf(stderr,"Too many bad codes specified (limit %d), aborting!\n", MAX_BAD_CHAR);
         exit(1);
-      case 'q':
-        quiet=1;
-        break;
-      case 'c':
-        checkOnly=1;
-        break;
-      case 'b':
-        if (badChar>=(MAX_BAD_CHAR-1)) {
-          fprintf(stderr,"Too many bad codes specified (limit %d), aborting!\n", MAX_BAD_CHAR);
-          exit(1);
-        }
-        badChars[badChar++]=(int)strtoul(utf8_optarg,NULL,0);
-        badChars[badChar]=0;
-        break;
-      case 'e':
-        maxErrors=(int)strtoul(utf8_optarg,NULL,0);
-        break;
-      case 's':
-        substituteChar = utf8_optarg[0];
-        break;
-      case 'm':
-        badMultiByteToMultiChar=1;
-        break;
-      case 'l':
-        checkOverlong=0;
-        break;
-      case 'x':
+      }
+      badChars[badChar++]=(int)strtoul(utf8_optarg,NULL,0);
+      badChars[badChar]=0;
+      break;
+    case 'e':
+      maxErrors=(int)strtoul(utf8_optarg,NULL,0);
+      break;
+    case 's':
+      substituteChar = utf8_optarg[0];
+      break;
+    case 'm':
+      badMultiByteToMultiChar=1;
+      break;
+    case 'l':
+      checkOverlong=0;
+      break;
+    case 'x':
+      checkXML1_0Chars=1;
+      break;
+    case 'X':
+      if (strcmp(utf8_optarg,"1.0")==0) {
         checkXML1_0Chars=1;
-        break;
-      case 'X':
-        if (strcmp(utf8_optarg,"1.0")==0) {
-          checkXML1_0Chars=1;
-        } else if (strcmp(utf8_optarg,"1.1")==0) {
-          checkXML1_1Chars=1;
-          checkXML1_1Restricted=1;
-        } else if (strcmp(utf8_optarg,"1.1lax")==0) {
-          checkXML1_1Chars=1;
-        } else {
-          fprintf(stderr,"Bad value for -X flag: '%s', aborting!\n",utf8_optarg);
-          exit(1);
-        }
-        break;
-      case 'L':
-        fprintf(stderr,GNU_GPL_NOTICE1);
-        fprintf(stderr,GNU_GPL_NOTICE2);
+      } else if (strcmp(utf8_optarg,"1.1")==0) {
+        checkXML1_1Chars=1;
+        checkXML1_1Restricted=1;
+      } else if (strcmp(utf8_optarg,"1.1lax")==0) {
+        checkXML1_1Chars=1;
+      } else {
+        fprintf(stderr,"Bad value for -X flag: '%s', aborting!\n",utf8_optarg);
         exit(1);
+      }
+      break;
+    case 'L':
+      fprintf(stderr,GNU_GPL_NOTICE1);
+      fprintf(stderr,GNU_GPL_NOTICE2);
+      exit(1);
     }
   }
   checkEntities=(checkXML1_0Chars || checkXML1_1Chars);
@@ -199,8 +198,11 @@ int main (int argc, char* argv[]) {
    * of UTF-8 continuation bytes, check for unicode character validity
    */
   while ((ch=getc(stdin))!=EOF) {
-    bytenum++; charnum++;
-    if (ch=='\n') { linenum++; }
+    bytenum++;
+    charnum++;
+    if (ch=='\n') {
+      linenum++;
+    }
     error[0]='\0'; /* clear error string */
     unicode=ch;
     if ((ch&0x80)==0) {
@@ -235,20 +237,20 @@ int main (int argc, char* argv[]) {
     for (j=1; j<=contBytes; j++) {
       if ((ch=getc(stdin))!=EOF) {
         bytenum++;
-	byte[j]=ch;
+        byte[j]=ch;
         if ((ch&0xC0)!=0x80) {
           /* doesn't match 10xxxxxx */
-	  snprintf(buf,sizeof(buf),"byte %d isn't continuation:",(j+1));
+          snprintf(buf,sizeof(buf),"byte %d isn't continuation:",(j+1));
           addMessage(buf);
           for (k=0; k<=j; k++) {
             snprintf(buf,sizeof(buf)," 0x%02X", byte[k]);
             addMessage(buf);
           }
-	  snprintf(buf,sizeof(buf),"restart at 0x%02X",ch);
+          snprintf(buf,sizeof(buf),"restart at 0x%02X",ch);
           addMessage(buf);
-	  ungetc(ch,stdin);
-	  bytenum--;
-	  break;
+          ungetc(ch,stdin);
+          bytenum--;
+          break;
         }
         unicode = (unicode << 6) + (ch&0x3F);
       } else {
@@ -260,7 +262,7 @@ int main (int argc, char* argv[]) {
 
     /* check for overlong encodings if no error already */
     if ((error[0]=='\0') && checkOverlong && contBytes>0
-                         && (unicode <= highestCharInNBytes[contBytes-1])) {
+        && (unicode <= highestCharInNBytes[contBytes-1])) {
       snprintf(buf,sizeof(buf),"illegal overlong encoding of 0x%04X",unicode);
       addMessage(buf);
     }
@@ -289,14 +291,14 @@ int main (int argc, char* argv[]) {
       for (j=1; (j<MAX_BYTES && byte[j-1]!=';'); j++) {
         if ((ch=getc(stdin))==EOF) {
           byte[j]=';';
-	  snprintf(buf,sizeof(buf),"EOF in entity reference, terminated to read %s",byteToStr(byteStr,byte,j));
-	  addMessage(buf);
+          snprintf(buf,sizeof(buf),"EOF in entity reference, terminated to read %s",byteToStr(byteStr,byte,j));
+          addMessage(buf);
         } else if (ch<32) {
           ungetc(ch,stdin);
           byte[j]=';';
-	  snprintf(buf,sizeof(buf),"character<32 in entity reference, terminated to read %s",byteToStr(byteStr,byte,j));
-	  addMessage(buf);
-	} else {
+          snprintf(buf,sizeof(buf),"character<32 in entity reference, terminated to read %s",byteToStr(byteStr,byte,j));
+          addMessage(buf);
+        } else {
           bytenum++;
           if ((ch<'0' || ch>'9') && (ch<'a' || ch>'z') && (ch<'A' || ch>'Z') && ch!='#' && ch!=';') {
             /* FIXME - There are a vast number of characters allowed in a general XML entity
@@ -304,8 +306,8 @@ int main (int argc, char* argv[]) {
              * FIXME - Here I allow a reduced set of characters sufficient to allow parsing of
              * FIXME - numeric character references and the 5 XML entities [Simeon/2005-10-25]
              */
-   	    snprintf(buf,sizeof(buf),"bad character in entity reference, got 0x%02X, substituted ?",ch);
-	    addMessage(buf);
+            snprintf(buf,sizeof(buf),"bad character in entity reference, got 0x%02X, substituted ?",ch);
+            addMessage(buf);
             ch='?';
           }
           byte[j]=ch;
@@ -316,11 +318,11 @@ int main (int argc, char* argv[]) {
         if (byte[1]=='#') {
           if ((unicode=parseNumericCharacterReference(byte))==0) {
             snprintf(buf,sizeof(buf),"bad numeric character reference: %s",byteToStr(byteStr,byte,contBytes));
- 	    addMessage(buf);
+            addMessage(buf);
           }
-	} else if (!validXMLEntity(byte)) {
+        } else if (!validXMLEntity(byte)) {
           snprintf(buf,sizeof(buf),"illegal XML  entity reference: %s",byteToStr(byteStr,byte,contBytes));
-	  addMessage(buf);
+          addMessage(buf);
         }
       } else {
         /* There is no limit on the length of an entity, it is defined via:
@@ -333,8 +335,8 @@ int main (int argc, char* argv[]) {
          * MAX_BYTES which is more than sufficient to allow numeric character
          * references and the 5 XML entities [Simeon/2005-10-25]
          */
-	snprintf(buf,sizeof(buf),"entity reference too long (local constraint) or not terminated, adding ;");
-	addMessage(buf);
+        snprintf(buf,sizeof(buf),"entity reference too long (local constraint) or not terminated, adding ;");
+        addMessage(buf);
         byte[++contBytes]=';';
       }
     }
@@ -371,7 +373,7 @@ int main (int argc, char* argv[]) {
             byte[k]=substituteChar;
           }
         }
-	snprintf(buf,sizeof(buf),"substituted ");
+        snprintf(buf,sizeof(buf),"substituted ");
         addMessage(buf);
         for (k=0; k<=(j-1); k++) {
           snprintf(buf,sizeof(buf)," 0x%02X", byte[k]);
@@ -382,14 +384,16 @@ int main (int argc, char* argv[]) {
          */
         byte[0]=substituteChar;
         j=1;
-	snprintf(buf,sizeof(buf),"substituted 0x%02X", byte[0]);
+        snprintf(buf,sizeof(buf),"substituted 0x%02X", byte[0]);
         addMessage(buf);
       }
     } else {
       /* Finally check for restricted chars that we do a NCR substitution for */
       if (checkXML1_1Restricted && restrictedXML1_1Char(unicode)) {
         j=snprintf(buf,sizeof(buf),"&#x%X",unicode);
-        for (k=0; k<=j; k++) { byte[k]=(int)buf[k]; } /* copy char array to int array */
+        for (k=0; k<=j; k++) {
+          byte[k]=(int)buf[k];    /* copy char array to int array */
+        }
         snprintf(error,sizeof(error),"code restricted in XML1.1: 0x%04X, substituted NCR: '%s'",unicode,buf);
       }
     }
@@ -415,7 +419,6 @@ int main (int argc, char* argv[]) {
   exit(0);
 }
 
-
 /* Returns true unless the character is one of a small set of codes
  * that do not represent legal characters in Unicode.
  *
@@ -432,7 +435,6 @@ int main (int argc, char* argv[]) {
 int validUTF8Char(unsigned int ch) {
   return((ch<0xD800 || ch>0xDFFF) && ch<=0x10FFFF);
 }
-
 
 /* From http://www.w3.org/TR/2000/REC-xml-20001006
  * (sec 2.2, extracted 16July2001)
@@ -457,7 +459,6 @@ int validXML1_0Char(unsigned int ch) {
          (ch>=0xE000 && ch<=0xFFFD) ||
          (ch>=0x10000 && ch<=0x10FFFF));
 }
-
 
 /* From http://www.w3.org/TR/xml11/#charsets
  * (sec 2.2, extracted 23Dec2003)
@@ -490,7 +491,6 @@ int restrictedXML1_1Char(unsigned int ch) {
          (ch>=0x7F && ch<=0x84) ||
          (ch>=0x86 && ch<=0xBF));
 }
-
 
 /* Parse a numeric character reference in either decimal or hex
  * notation. Expects b[] to start with codes for &# and to be
@@ -533,7 +533,6 @@ unsigned int parseNumericCharacterReference(int b[]) {
   }
   return(unicode);
 }
-
 
 /* Returns true if the entity passed in is one of the 5 pre-defined
  * valid non-numerical entities allowed in XML:
