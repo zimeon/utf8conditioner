@@ -9,9 +9,16 @@ TEST_TMP = /tmp/utf8conditioner_test
 
 CC = gcc
 LIBS =
-CFLAGS =
+CFLAGS += -W -Wall -Werror -std=c99 -pedantic -Wno-unused-result
+CFLAGS += -D_BSD_SOURCE\
+	-D_DEFAULT_SOURCE\
+	-D_POSIX_C_SOURCE=200809L
 
-all utf8conditioner: $(OBJ)
+.PHONY: all
+all: utf8conditioner
+	@echo "utf8conditioner built"
+
+utf8conditioner: $(OBJ)
 	$(CC) $(OBJ) $(LIBS) -o $(EXECUTABLE)
 
 strict:
