@@ -1,14 +1,14 @@
 /* UTF-8 checker and conditioner
  * Copyright (C) 2001-2005 Simeon Warner - simeon@cs.cornell.edu
  *
- * utf8conditioner is supplied under the GNU Public License and comes 
+ * utf8conditioner is supplied under the GNU Public License and comes
  * with ABSOLUTELY NO WARRANTY; see COPYING for more details.
  *
  * utf8conditioner includes software developed by the University of
  * California, Berkeley and its contributors. (getopt)
  *
- * Designed for use with Open Archives Initiative (OAI, 
- * see: http://www.openarchives.org/) harvesting software. Aims to 
+ * Designed for use with Open Archives Initiative (OAI,
+ * see: http://www.openarchives.org/) harvesting software. Aims to
  * `fix' bad codes in UTF-8 encoded XML so that XML parsers will
  * be able to parse it (albeit with some corruption introduced by
  * substitution of dummy characters in place of illegal codes).
@@ -17,8 +17,8 @@
  * bytes from various 8-bit character sets. Thus, any attempt to read a
  * sequence of continuation bytes that finds an invalid byte will result
  * in the termination of the attempt to read the multi-byte character. Each
- * valid single byte will be written out, invalid single bytes will be 
- * replaced with a dummy character. The hope is that this will avoid an 
+ * valid single byte will be written out, invalid single bytes will be
+ * replaced with a dummy character. The hope is that this will avoid an
  * error having run-on effects which might interfere with XML markup.
  * (Option -m changes this behaviour to replace an invalid multi-byte
  * with a single dummy character.)
@@ -40,7 +40,7 @@
 //extern int snprintf(char *str, size_t size, const char *format, ...);
 #include <string.h>
 #include <stdlib.h> /* for strtoul() */
-#include "getopt.h" /* for getopt(), could use unistd on Unix */ 
+#include "getopt.h" /* for getopt(), could use unistd on Unix */
 
 #define MAX_BAD_CHAR 100
 #define MAX_BYTES 10
@@ -61,7 +61,7 @@ char error[200];                  /* global place to build error string */
 int main (int argc, char* argv[]) {
   int j,k;
   int ch;
-  char buf[100];                  /* tmp used when building error string */ 
+  char buf[100];                  /* tmp used when building error string */
   char byteStr[MAX_BYTES+1];      /* used to build string for entity ref error messages */
 
   int byte[MAX_BYTES];            /* bytes of UTF-8 char (must be long enough to hold &#x10FFFF\0 */
@@ -71,9 +71,9 @@ int main (int argc, char* argv[]) {
   unsigned long int charnum=0;    /* count of characters read */
   unsigned long int linenum=1;    /* count of lines */
   unsigned int unicode;           /* Unicode character represented by UTF-8 */
- 
+
   int maxErrors=1000;             /* max number of error messages to print */
-  int numErrors=0;                /* count of errors */   
+  int numErrors=0;                /* count of errors */
   int quiet=0;                    /* quiet option */
   int checkOnly=0;                /* check only option */
   int substituteChar = '?';       /* substitute for bad characters */
@@ -84,7 +84,7 @@ int main (int argc, char* argv[]) {
   int badMultiByteToMultiChar=0;  /* -m option */
   int checkEntities=0;            /* check entities if any XML checks are on */
 
-  int badChar=0;                  /* variables for bad characters option */ 
+  int badChar=0;                  /* variables for bad characters option */
   unsigned int badChars[MAX_BAD_CHAR];
   int highestCharInNBytes[6];
 
@@ -102,7 +102,7 @@ int main (int argc, char* argv[]) {
    */
   while ((j=getopt(argc,argv,"hH?qce:b:s:xX:mlL"))!=EOF) {
     switch (j) {
-      case 'h': 
+      case 'h':
       case 'H':
       case '?':
         /* string split to meet ISO C89 requirement of <=509 chars */
@@ -132,19 +132,19 @@ int main (int argc, char* argv[]) {
 "  -l   lax - don't check for overlong encodings\n"
 "  -m   replace invalid multi-byte sequences with multiple dummy characters\n"
 "  -s   change character substituted for bad codes (default '%c')\n\n"
-"  -L   display information about license\n  -h   this help\n\n", maxErrors, substituteChar);  
+"  -L   display information about license\n  -h   this help\n\n", maxErrors, substituteChar);
         exit(1);
       case 'q':
         quiet=1;
         break;
       case 'c':
         checkOnly=1;
-        break; 
+        break;
       case 'b':
         if (badChar>=(MAX_BAD_CHAR-1)) {
           fprintf(stderr,"Too many bad codes specified (limit %d), aborting!\n", MAX_BAD_CHAR);
-          exit(1); 
-        } 
+          exit(1);
+        }
         badChars[badChar++]=(int)strtoul(utf8_optarg,NULL,0);
         badChars[badChar]=0;
         break;
@@ -162,20 +162,20 @@ int main (int argc, char* argv[]) {
         break;
       case 'x':
         checkXML1_0Chars=1;
-        break; 
+        break;
       case 'X':
         if (strcmp(utf8_optarg,"1.0")==0) {
           checkXML1_0Chars=1;
-        } else if (strcmp(utf8_optarg,"1.1")==0) { 
+        } else if (strcmp(utf8_optarg,"1.1")==0) {
           checkXML1_1Chars=1;
           checkXML1_1Restricted=1;
-        } else if (strcmp(utf8_optarg,"1.1lax")==0) { 
+        } else if (strcmp(utf8_optarg,"1.1lax")==0) {
           checkXML1_1Chars=1;
         } else {
           fprintf(stderr,"Bad value for -X flag: '%s', aborting!\n",utf8_optarg);
           exit(1);
         }
-        break; 
+        break;
       case 'L':
         fprintf(stderr,GNU_GPL_NOTICE1);
         fprintf(stderr,GNU_GPL_NOTICE2);
@@ -185,16 +185,16 @@ int main (int argc, char* argv[]) {
   checkEntities=(checkXML1_0Chars || checkXML1_1Chars);
 
   /*
-   * Barf if anything on command line left unread (probably an attempt to 
+   * Barf if anything on command line left unread (probably an attempt to
    * specify a file name instead of using stdin)
    */
   if (argc>utf8_optind) {
     fprintf(stderr,"Unknown parameters specified on command line (-h for help), aborting!\n");
-    exit(1); 
+    exit(1);
   }
 
   /*
-   * Go through input code (character) by code and check for correct use 
+   * Go through input code (character) by code and check for correct use
    * of UTF-8 continuation bytes, check for unicode character validity
    */
   while ((ch=getc(stdin))!=EOF) {
@@ -230,7 +230,7 @@ int main (int argc, char* argv[]) {
       contBytes=0;
     }
     byte[0]=ch;
-    
+
     for (j=1; j<=contBytes; j++) {
       if ((ch=getc(stdin))!=EOF) {
         bytenum++;
@@ -258,29 +258,29 @@ int main (int argc, char* argv[]) {
     }
 
     /* check for overlong encodings if no error already */
-    if ((error[0]=='\0') && checkOverlong && contBytes>0 
+    if ((error[0]=='\0') && checkOverlong && contBytes>0
                          && (unicode<=highestCharInNBytes[contBytes-1])) {
       snprintf(buf,sizeof(buf),"illegal overlong encoding of 0x%04X",unicode);
       addMessage(buf);
     }
- 
-    /* Attempt to read numeric character reference or entity reference if we 
-     * have an ampersand (&) start character, e.g. &#123; for decimal, 
-     * &#xABC; for hex 
+
+    /* Attempt to read numeric character reference or entity reference if we
+     * have an ampersand (&) start character, e.g. &#123; for decimal,
+     * &#xABC; for hex
      *
      * http://www.w3.org/TR/2000/WD-xml-2e-20000814#dt-charref
      *
      * [66] CharRef ::= '&#' [0-9]+ ';' | '&#x' [0-9a-fA-F]+ ';'
-     * 
+     *
      * Well-formedness constraint: Legal Character
-     * 
-     * Characters referred to using character references must match 
+     *
+     * Characters referred to using character references must match
      * the production for Char.
      *
-     * If the character reference begins with "&#x ", the digits and letters 
-     * up to the terminating ; provide a hexadecimal representation of the 
-     * character's code point in ISO/IEC 10646. If it begins just with "&#", 
-     * the digits up to the terminating ; provide a decimal representation 
+     * If the character reference begins with "&#x ", the digits and letters
+     * up to the terminating ; provide a hexadecimal representation of the
+     * character's code point in ISO/IEC 10646. If it begins just with "&#",
+     * the digits up to the terminating ; provide a decimal representation
      * of the character's code point.
      */
     entityRef=0;
@@ -297,10 +297,10 @@ int main (int argc, char* argv[]) {
 	  addMessage(buf);
 	} else {
           bytenum++;
-          if ((ch<'0' || ch>'9') && (ch<'a' || ch>'z') && (ch<'A' || ch>'Z') && ch!='#' && ch!=';') {  
+          if ((ch<'0' || ch>'9') && (ch<'a' || ch>'z') && (ch<'A' || ch>'Z') && ch!='#' && ch!=';') {
             /* FIXME - There are a vast number of characters allowed in a general XML entity
              * FIXME - reference (see http://www.w3.org/TR/2000/WD-xml-2e-20000814#NT-EntityRef).
-             * FIXME - Here I allow a reduced set of characters sufficient to allow parsing of 
+             * FIXME - Here I allow a reduced set of characters sufficient to allow parsing of
              * FIXME - numeric character references and the 5 XML entities [Simeon/2005-10-25]
              */
    	    snprintf(buf,sizeof(buf),"bad character in entity reference, got 0x%02X, substituted ?",ch);
@@ -328,8 +328,8 @@ int main (int argc, char* argv[]) {
          *  [5]      Name   ::=    (Letter | '_' | ':') ( NameChar)*
          *  [4]  NameChar   ::=    Letter | Digit  | '.' | '-' | '_' | ':' | CombiningChar | Extender
          * ...
-         * However, here we add a local constraint of maximum length 
-         * MAX_BYTES which is more than sufficient to allow numeric character 
+         * However, here we add a local constraint of maximum length
+         * MAX_BYTES which is more than sufficient to allow numeric character
          * references and the 5 XML entities [Simeon/2005-10-25]
          */
 	snprintf(buf,sizeof(buf),"entity reference too long (local constraint) or not terminated, adding ;");
@@ -349,14 +349,14 @@ int main (int argc, char* argv[]) {
         snprintf(error,sizeof(error),"code not allowed in XML1.0: 0x%04X",unicode);
       } else if (checkXML1_1Chars && !validXML1_1Char(unicode)) {
         snprintf(error,sizeof(error),"code not allowed in XML1.1: 0x%04X",unicode);
-      } else { 
+      } else {
         for (k=0; badChars[k]!=0; k++) {
           if (unicode==badChars[k]) {
             snprintf(error,sizeof(error),"bad code: 0x%04X", unicode);
             break;
           }
         }
-      } 
+      }
     }
 
     if (error[0]!='\0') {
@@ -384,7 +384,7 @@ int main (int argc, char* argv[]) {
 	snprintf(buf,sizeof(buf),"substituted 0x%02X", byte[0]);
         addMessage(buf);
       }
-    } else { 
+    } else {
       /* Finally check for restricted chars that we do a NCR substitution for */
       if (checkXML1_1Restricted && restrictedXML1_1Char(unicode)) {
         j=snprintf(buf,sizeof(buf),"&#x%X",unicode);
@@ -401,7 +401,7 @@ int main (int argc, char* argv[]) {
       contBytes=j-1;
     }
 
-    if (!checkOnly) { 
+    if (!checkOnly) {
       for (k=0; k<=contBytes; k++) {
         putc(byte[k],stdout);
       }
@@ -418,31 +418,31 @@ int main (int argc, char* argv[]) {
 /* Returns true unless the character is one of a small set of codes
  * that do not represent legal characters in Unicode.
  *
- * From Unicode 3.2 (http://www.unicode.org/unicode/reports/tr28/#3_1_conformance) 
- * UxD800..UxDFFF are ill-formed 
+ * From Unicode 3.2 (http://www.unicode.org/unicode/reports/tr28/#3_1_conformance)
+ * UxD800..UxDFFF are ill-formed
  *
  * UTF-8 is defined by http://www.ietf.org/rfc/rfc3629.txt
  * (and obsoletes http://www.ietf.org/rfc/rfc2279.txt which, in turn
  * obsoletes http://www.ietf.org/rfc/rfc2044.txt )
  *
  * Ux10FFFF is highest legal UTF-8 code
- * RFC2279 permitted codes greater than Ux10FFFF but RFC3629 does not. 
+ * RFC2279 permitted codes greater than Ux10FFFF but RFC3629 does not.
  */
 int validUTF8Char(unsigned int ch) {
   return((ch<0xD800 || ch>0xDFFF) && ch<=0x10FFFF);
 }
 
 
-/* From http://www.w3.org/TR/2000/REC-xml-20001006 
+/* From http://www.w3.org/TR/2000/REC-xml-20001006
  * (sec 2.2, extracted 16July2001)
  *
- * Legal characters are tab, carriage return, line feed, and the legal 
- * characters of Unicode and ISO/IEC 10646. The versions of these standards 
- * cited in A.1 Normative References were current at the time this document 
- * was prepared. New characters may be added to these standards by amendments 
- * or new editions. Consequently, XML processors must accept any character 
- * in the range specified for Char. The use of "compatibility characters", 
- * as defined in section 6.8 of [Unicode] (see also D21 in section 3.6 of 
+ * Legal characters are tab, carriage return, line feed, and the legal
+ * characters of Unicode and ISO/IEC 10646. The versions of these standards
+ * cited in A.1 Normative References were current at the time this document
+ * was prepared. New characters may be added to these standards by amendments
+ * or new editions. Consequently, XML processors must accept any character
+ * in the range specified for Char. The use of "compatibility characters",
+ * as defined in section 6.8 of [Unicode] (see also D21 in section 3.6 of
  * [Unicode3]), is discouraged.]
  *
  * Character Range
@@ -454,33 +454,33 @@ int validXML1_0Char(unsigned int ch) {
   return(ch==0x09 || ch==0x0A || ch==0x0D ||
          (ch>=0x20 && ch<=0xD7FF) ||
          (ch>=0xE000 && ch<=0xFFFD) ||
-         (ch>=0x10000 && ch<=0x10FFFF)); 
-} 
+         (ch>=0x10000 && ch<=0x10FFFF));
+}
 
 
 /* From http://www.w3.org/TR/xml11/#charsets
  * (sec 2.2, extracted 23Dec2003)
- * 
- * Char ::=  [#x1-#xD7FF] | [#xE000-#xFFFD] | [#x10000-#x10FFFF]  
- * RestrictedChar ::= [#x1-#x8] | [#xB-#xC] | [#xE-#x1F] | 
+ *
+ * Char ::=  [#x1-#xD7FF] | [#xE000-#xFFFD] | [#x10000-#x10FFFF]
+ * RestrictedChar ::= [#x1-#x8] | [#xB-#xC] | [#xE-#x1F] |
  *                    [#x7F-#x84] | [#x86-#xBF]
  *
  * Spec doesn't seem to say what one should do about RestricterChar.
  * However, http://www.w3.org/International/questions/qa-controls.html
  * says:
  *
- * In XML 1.1 (which is still in Candidate Recommendation stage), if you 
- * need to represent a control code explicitly the simplest alternative 
- * is to use an NCR (numeric character reference). For example, the control 
- * code ESC (Escape) U+001B would be represented by either the &#x1B; 
+ * In XML 1.1 (which is still in Candidate Recommendation stage), if you
+ * need to represent a control code explicitly the simplest alternative
+ * is to use an NCR (numeric character reference). For example, the control
+ * code ESC (Escape) U+001B would be represented by either the &#x1B;
  * (hexadecimal) or &#27; (decimal) Numeric Character References.
  *
  */
 int validXML1_1Char(unsigned int ch) {
   return((ch>=0x1 && ch<=0xD7FF) ||
          (ch>=0xE000 && ch<=0xFFFD) ||
-         (ch>=0x10000 && ch<=0x10FFFF)); 
-} 
+         (ch>=0x10000 && ch<=0x10FFFF));
+}
 
 int restrictedXML1_1Char(unsigned int ch) {
   return((ch>=0x1 && ch<=0x8) ||
@@ -488,18 +488,18 @@ int restrictedXML1_1Char(unsigned int ch) {
          (ch>=0xE && ch<=0x1F) ||
          (ch>=0x7F && ch<=0x84) ||
          (ch>=0x86 && ch<=0xBF));
-} 
+}
 
 
 /* Parse a numeric character reference in either decimal or hex
- * notation. Expects b[] to start with codes for &# and to be 
+ * notation. Expects b[] to start with codes for &# and to be
  * terminated with ;
  *
  * Returns: unicode code point on success
- *          0                  on failure 
+ *          0                  on failure
  *
- * Note that #x0 is not a valid XML Char and so can safely be used 
- * as the failure return value. 
+ * Note that #x0 is not a valid XML Char and so can safely be used
+ * as the failure return value.
  * See http://www.w3.org/TR/2000/WD-xml-2e-20000814#sec-references
  */
 unsigned int parseNumericCharacterReference(int b[]) {
@@ -517,7 +517,7 @@ unsigned int parseNumericCharacterReference(int b[]) {
         unicode+=b[j]-'A'+10;
       } else {
         return(0);
-      } 
+      }
     }
   } else {
     /* decimal */
@@ -527,7 +527,7 @@ unsigned int parseNumericCharacterReference(int b[]) {
         unicode+=b[j]-'0';
       } else {
         return(0);
-      } 
+      }
     }
   }
   return(unicode);
@@ -537,7 +537,7 @@ unsigned int parseNumericCharacterReference(int b[]) {
 /* Returns true if the entity passed in is one of the 5 pre-defined
  * valid non-numerical entities allowed in XML:
  *   &amp; &apos; &quot; &gt; &lt;
- * Returns false otherwise 
+ * Returns false otherwise
  */
 int validXMLEntity(int b[]) {
   return( b[0]=='&' &&
