@@ -38,7 +38,7 @@ zip:
 	ls -l /tmp/utf8conditioner.zip
 
 .PHONY: test
-test:
+test: $(EXECUTABLE)
 	@echo -n "test[01] - option -c ..................... "
 	@cat test/testfile | ./$(EXECUTABLE) -c 2> $(TEST_TMP)
 	@r=`diff -I 'Id' $(TEST_TMP) test/test-result-c.txt 2>&1`
